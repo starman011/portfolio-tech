@@ -1,0 +1,10 @@
+{
+  "name": "saqlain-khan-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A static narrative portfolio across architecture, software and architectural intelligence.",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "build": "node scripts/build.mjs"
+  }
+}

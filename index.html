@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Saqlain Khan — an architect fluent in code. Exploring spatial ideas through full-stack products, engineering applications, computational design, and AI.">
+  <meta name="theme-color" content="#eee9de">
+  <title>Saqlain Khan — Architecture, Code & Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Playfair+Display:ital,wght@0,500;1,500&amp;display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="hero.css">
+  <script src="assets/vendor/gsap.min.js" defer></script>
+  <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="permutation-engine.js" defer></script>
+  <script src="permutation-scene.js" defer></script>
+  <script src="motion.js" defer></script>
+  <script src="assets/data/north-america.js" defer></script>
+  <script src="tracker.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="reading-progress" aria-hidden="true"></div>
+
+  <header class="topbar section-shell">
+    <a class="wordmark" href="#top" aria-label="Saqlain Khan, home"><span>SK</span><em>Saqlain Khan</em></a>
+    <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation">
+      <a href="#work">Work</a>
+      <a href="#path">Practice</a>
+      <a href="#research">Research</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="nav-controls">
+      <button class="theme-toggle" type="button" aria-label="Use dark theme" aria-pressed="false"><span aria-hidden="true"></span><span class="theme-label">Dark mode</span></button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu <span aria-hidden="true">+</span></button>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <section class="hero hero-spatial" id="top" aria-labelledby="hero-title">
+      <div class="surface-instrument" id="surface-instrument">
+        <div class="field-aura" aria-hidden="true">
+          <div class="aura-light aura-light-a"></div>
+          <div class="aura-light aura-light-b"></div>
+          <div class="aura-light aura-light-c"></div>
+        </div>
+
+        <div class="scene-heading">
+          <span class="scene-label">Perpendicular orbits<span>Two circular paths · 90°</span></span>
+          <div class="field-counter">
+            <span id="building-variation" role="status" aria-live="off">01 / 24</span>
+            <span id="permutation-total">4 rules · 24 permutations</span>
+          </div>
+        </div>
+
+        <div class="surface-stage">
+          <canvas id="surface-canvas" width="1600" height="1000" tabindex="0" role="img" aria-describedby="scene-instructions grammar-description" aria-label="Two circular rings in perpendicular planes at 90 degrees. Tap Fold, Twist, Shift or Stretch to change their surface profiles. Drag or use arrow keys to orbit.">Two circular rings at a right angle, rotating within their own planes.</canvas>
+          <noscript><div class="surface-fallback-note"><p>A different order.<br>A different possibility.</p><span>Enable JavaScript to explore the field.</span></div></noscript>
+        </div>
+
+        <div class="field-introduction">
+          <p class="eyebrow">Architect &amp; software engineer</p>
+          <h1 id="hero-title">Ideas,<br><i>in motion.</i></h1>
+        </div>
+
+        <a class="scene-enter" href="#path"><span class="enter-label">Explore my work</span><span class="enter-icon" aria-hidden="true">↘</span></a>
+
+        <div class="scene-bottomline">
+          <p id="scene-instructions">Drag to orbit<span class="visually-hidden"> or use arrow keys when the form is focused. Home resets the view.</span></p>
+        </div>
+
+        <div class="surface-modes scene-views" role="group" aria-label="Model view">
+          <button type="button" data-surface-mode="points" aria-pressed="false">Dots</button>
+          <button type="button" data-surface-mode="wireframe" aria-pressed="true">Wireframe</button>
+          <button type="button" data-surface-mode="normals" aria-pressed="false">RGB normals</button>
+        </div>
+
+        <div class="scene-dock" aria-label="Permutation controls">
+          <div class="grammar-steps" role="group" aria-label="Tap an operation to change its position in the sequence and change the ring profile">
+            <button type="button" data-rule="Fold">Fold</button>
+            <button type="button" data-rule="Twist">Twist</button>
+            <button type="button" data-rule="Shift">Shift</button>
+            <button type="button" data-rule="Stretch">Stretch</button>
+          </div>
+
+          <div class="dock-footer">
+            <p id="grammar-description" role="status" aria-live="polite">Tap a rule. Change the form.</p>
+            <div class="scene-playback">
+              <button class="motion-toggle" type="button" aria-pressed="false">Pause Ⅱ</button>
+              <button type="button" id="generate-building">Shuffle <span aria-hidden="true">↻</span></button>
+            </div>
+          </div>
+        </div>
+
+        <details class="scene-inspector" id="scene-inspector">
+          <summary>Tune <span aria-hidden="true">+</span></summary>
+          <div class="inspector-panel">
+            <div class="inspector-title"><span>Make it your own</span><button type="button" id="reset-pavilion">Reset view ↺</button></div>
+            <fieldset class="rule-options">
+              <legend>Combine the rules</legend>
+              <label><input type="checkbox" data-enabled-rule="Fold" checked>Fold</label>
+              <label><input type="checkbox" data-enabled-rule="Twist" checked>Twist</label>
+              <label><input type="checkbox" data-enabled-rule="Shift" checked>Shift</label>
+              <label><input type="checkbox" data-enabled-rule="Stretch" checked>Stretch</label>
+            </fieldset>
+            <label class="sun-control" for="sun-time"><span>Light angle</span><input id="sun-time" type="range" min="6" max="18" step="0.25" value="10"><output id="sun-time-value" for="sun-time">10:00</output></label>
+            <button type="button" id="explode-pavilion" aria-pressed="false">Open the field</button>
+            <p class="surface-readout" id="surface-readout">One surface. A different outcome for every order.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <div class="discipline-strip section-shell" aria-label="Areas of practice">
+      <span>Architecture</span><span aria-hidden="true">×</span>
+      <span>Full-stack systems</span><span aria-hidden="true">×</span>
+      <span>Applications</span><span aria-hidden="true">×</span>
+      <span>AI integration</span>
+      <a href="#work" aria-label="Scroll to selected work">Scroll to explore ↓</a>
+    </div>
+
+    <section class="statement section-shell chapter" id="path" aria-labelledby="path-title">
+      <div class="section-index"><span>01 / A practice of curiosity</span><span>Follow the question</span></div>
+      <div class="statement-grid">
+        <h2 id="path-title">I learn by<br><i>building.</i></h2>
+        <div>
+          <p>Architecture taught me to see relationships. Code lets me test them.</p>
+          <p>I follow a question, make something, and learn from what happens. These are a few questions I couldn’t leave alone.</p>
+        </div>
+      </div>
+
+      <div class="m-path">
+        <svg class="m-connector" viewBox="0 0 1000 96" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 78 L330 10 L660 78 L1000 10" fill="none" stroke="currentColor" stroke-width="1"/>
+          <path class="m-signal" d="M0 78 L330 10 L660 78 L1000 10" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="25 1200"/>
+        </svg>
+        <div class="m-node"><span class="node-point" aria-hidden="true"></span><strong>01 / Observe</strong><h3>Architecture</h3><p>Understand a space.</p></div>
+        <div class="m-node"><span class="node-point" aria-hidden="true"></span><strong>02 / Explore</strong><h3>Computation</h3><p>Change a rule.</p></div>
+        <div class="m-node"><span class="node-point" aria-hidden="true"></span><strong>03 / Build</strong><h3>Software</h3><p>Build the tool.</p></div>
+        <div class="m-node"><span class="node-point" aria-hidden="true"></span><strong>04 / Question</strong><h3>Architectural intelligence</h3><p>Ask what comes next.</p></div>
+      </div>
+    </section>
+
+    <section class="work section-shell chapter" id="work" aria-labelledby="work-title">
+      <div class="section-index"><span>02 / Selected work</span><span>Built, shipped & being explored</span></div>
+
+      <div class="section-head">
+        <h2 id="work-title">Three questions.<br><i>Made tangible.</i></h2>
+        <ol class="chapter-index" aria-label="Project chapters">
+          <li><a href="#objecttracer"><span>01</span> A world in motion ↘</a></li>
+          <li><a href="#secondbrain"><span>02</span> A system that reasons ↘</a></li>
+          <li><a href="#wfc"><span>03</span> A field of possibilities ↘</a></li>
+        </ol>
+      </div>
+
+      <div class="project-grid">
+
+        <article class="project feature feature-object" id="objecttracer" data-category="systems">
+          <div class="project-heading">
+            <p class="kicker">01 / A world in motion · Live</p>
+            <a class="text-link" href="https://www.objecttracer.com/globe" target="_blank" rel="noopener noreferrer">Launch the globe <span aria-hidden="true">↗</span></a>
+          </div>
+
+          <div class="feature-layout">
+            <div class="feature-copy">
+              <h3>ObjectTracer<span class="title-dot">.</span></h3>
+              <p class="project-deck">What’s moving<br><i>above us?</i></p>
+              <p>A fascination with things in motion became ObjectTracer: one globe for aircraft, ships, satellites, and space. I built the full stack, shipped it, and keep learning from the people using it.</p>
+
+              <div class="project-metrics">
+                <div><strong>40,000<span>+</span></strong><span>Live-object rendering capacity</span></div>
+                <div><strong>1.5k</strong><span>Total users · Google Analytics</span></div>
+                <div><strong>70k<span>+</span></strong><span>Impressions · reported September 2026</span></div>
+              </div>
+
+              <div class="tags">
+                <span>Go</span>
+                <span>React</span>
+                <span>Three.js / WebGL</span>
+                <span>WebSockets</span>
+              </div>
+            </div>
+
+            <!-- OBJECTTRACER VIDEO -->
+          <a
+            class="objecttracer-card-link"
+            href="https://www.objecttracer.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open ObjectTracer"
+          >
+            <figure
+              class="motion-film object-visual objecttracer-card"
+              id="objecttracer-motion"
+            >
+              <div
+                class="motion-placeholder objecttracer-media"
+                data-motion-slot="objecttracer"
+              >
+                <video
+                  class="motion-video"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                >
+                  <source src="assets/motion/1.mp4" type="video/mp4">
+                  Your browser does not support HTML5 video.
+                </video>
+
+                <div class="objecttracer-card-top">
+                  <span class="objecttracer-index">01 / ObjectTracer</span>
+
+                  <span class="objecttracer-launch">
+                    Open ObjectTracer
+                    <span aria-hidden="true">↗</span>
+                  </span>
+                </div>
+
+                <div class="objecttracer-card-bottom">
+                  <span>Live globe</span>
+
+                  <span class="objecttracer-status">
+                    <i aria-hidden="true"></i>
+                    Live product
+                  </span>
+                </div>
+              </div>
+
+              <figcaption>
+                <span>ObjectTracer / Live globe</span>
+                <span>Aircraft · ships · satellites · space</span>
+              </figcaption>
+            </figure>
+          </a>
+          </div>
+
+          <div class="tracking-study" id="tracking-study">
+            <div class="tracking-top">
+              <div><p class="eyebrow">Follow a signal</p><h4>A continent of connections.</h4></div>
+              <span class="tracking-disclaimer">Sample traffic · not a live feed</span>
+            </div>
+
+            <div class="tracking-layout">
+              <div class="tracking-map">
+                <canvas id="tracking-canvas" width="1000" height="620" role="img" aria-label="North America map with simulated aircraft and ships. Select any object using the adjacent dropdown for accessible details.">A North America tracking illustration. The adjacent selector exposes each sample aircraft and ship.</canvas>
+
+                <div class="map-overlay" aria-hidden="true">
+                  <span>NORTH AMERICA</span>
+                  <span>+ Click a marker to inspect</span>
+                </div>
+
+                <div class="map-controls" role="group" aria-label="Map view">
+                  <button type="button" id="map-zoom-out" aria-label="Zoom map out">−</button>
+                  <button type="button" id="map-reset" aria-label="Reset map view">Reset</button>
+                  <button type="button" id="map-zoom-in" aria-label="Zoom map in">+</button>
+                </div>
+              </div>
+
+              <aside class="tracking-detail">
+                <div class="tracking-filters" role="group" aria-label="Traffic layers">
+                  <button type="button" data-traffic-type="air" aria-pressed="true"><span class="air-key" aria-hidden="true"></span>Aircraft</button>
+                  <button type="button" data-traffic-type="sea" aria-pressed="true"><span class="sea-key" aria-hidden="true"></span>Ships</button>
+                </div>
+
+                <label class="tracking-select-label" for="tracked-object">Inspect a sample object</label>
+                <select id="tracked-object"><option>Loading illustrative tracks</option></select>
+                <p class="track-type" id="track-type">Illustrative aircraft</p>
+                <h5 id="track-name">Select an object.</h5>
+                <p id="track-route">Explore the relationship between position, motion, and data.</p>
+
+                <dl class="track-stats">
+                  <div><dt>Speed</dt><dd id="track-speed">—</dd></div>
+                  <div><dt id="track-level-label">Altitude</dt><dd id="track-level">—</dd></div>
+                  <div><dt>Latitude</dt><dd id="track-latitude">—</dd></div>
+                  <div><dt>Longitude</dt><dd id="track-longitude">—</dd></div>
+                </dl>
+
+                <div class="tracking-footer">
+                  <span id="track-count">Sample traffic</span>
+                  <button type="button" id="tracking-pause" aria-pressed="false">Pause Ⅱ</button>
+                </div>
+
+                <p class="track-caption">Generated tracks for this study. Real-world data lives in the full product.</p>
+                <a class="text-link" href="https://www.objecttracer.com/globe" target="_blank" rel="noopener noreferrer">Open the live product ↗</a>
+                <p id="track-announcement" class="visually-hidden" role="status" aria-live="polite"></p>
+              </aside>
+            </div>
+
+            <noscript><p class="tracking-noscript">Enable JavaScript to explore the sample map, or follow the live product link above.</p></noscript>
+          </div>
+
+          <div class="system-story">
+            <p class="eyebrow">Under the surface</p>
+            <h4>Many signals. One continuous world.</h4>
+
+            <div class="system-flow">
+              <div><span>01 / Ingest</span><h5>Listen to the world.</h5><p>Go workers collect each source at its own pace.</p></div>
+              <div><span>02 / Organize</span><h5>Separate now from history.</h5><p>Redis holds now. PostgreSQL keeps the trails.</p></div>
+              <div><span>03 / Stream</span><h5>Send what the view needs.</h5><p>WebSockets send what the viewport needs.</p></div>
+              <div><span>04 / Render</span><h5>Make the data feel spatial.</h5><p>React and Three.js turn signals into a world.</p></div>
+            </div>
+          </div>
+
+          <details class="project-detail">
+            <summary><span>Explore the engineering</span><span class="detail-symbol" aria-hidden="true">+</span></summary>
+
+            <div class="engineering-story">
+              <div class="story-intro">
+                <p class="eyebrow">The details that make it work</p>
+                <h4>Complexity underneath.<br><i>Clarity at the surface.</i></h4>
+              </div>
+
+              <div class="engineering-decisions">
+                <div>
+                  <span class="decision-index">01 / Rendering</span>
+                  <h5>Thousands of objects.<br>A handful of draw paths.</h5>
+                  <p>GPU instancing shares geometry across aircraft categories. Reused transformation buffers keep the render loop lean. Selection works in screen space, using a spatial index at a distance and GPU color IDs up close.</p>
+                  <span class="decision-foot">InstancedMesh · screen-space picking · reusable buffers</span>
+                </div>
+
+                <div>
+                  <span class="decision-index">02 / Streaming</span>
+                  <h5>The whole picture first.<br>Only the changes after.</h5>
+                  <p>A snapshot establishes the view. Delta messages update the objects that moved or disappeared. When the visitor pans or zooms, the viewport tells the server which part of the world matters.</p>
+                  <span class="decision-foot">Snapshot → deltas · viewport bounds · WebSocket hub</span>
+                </div>
+
+                <div>
+                  <span class="decision-index">03 / Reliability</span>
+                  <h5>The invisible work<br>behind a fluid experience.</h5>
+                  <p>Reconnect handling, stale-object cleanup, bounded tile loading, and mobile memory fixes keep the experience usable beyond the ideal demo. Those decisions are part of the product, too.</p>
+                  <span class="decision-foot">Connection lifecycle · memory limits · progressive tiles</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-grid">
+              <div><h4>The challenge</h4><p>Different data sources, refresh rates, and spatial scales have to feel like a single continuous experience. Rendering and network traffic both need to stay responsive.</p></div>
+              <div><h4>What I built</h4><p>A Go backend with independent data-source workers, Redis for live state, PostgreSQL for trails, and viewport-filtered WebSocket updates. React and Three.js translate those streams into an explorable world.</p></div>
+              <div><h4>Beyond the code</h4><p>I own the product from architecture and development through deployment, monitoring, analytics, search optimization, and continuous delivery on Railway and Vercel.</p><a class="text-link" href="https://github.com/starman011/flightspace" target="_blank" rel="noopener noreferrer">Project repository ↗</a></div>
+            </div>
+          </details>
+        </article>
+
+        <article class="project feature feature-brain" id="secondbrain" data-category="systems">
+          <div class="project-heading">
+            <p class="kicker">02 / Knowledge into space · In development</p>
+            <a class="text-link" href="https://secondbrain-iota-eight.vercel.app/" target="_blank" rel="noopener noreferrer">Explore SEBIRA <span aria-hidden="true">↗</span></a>
+          </div>
+
+          <div class="feature-layout">
+            <div class="feature-copy">
+              <h3>SEBIRA<span class="title-dot">.</span></h3>
+              <p class="project-deck">Can a tool think<br><i>with an architect?</i></p>
+              <p>SEBIRA is my exploration of that question: an architectural second brain connecting AI, sourced knowledge, and deterministic geometry. I’m building the system—and learning where its limits are.</p>
+              <p class="project-principle">The model proposes.<br><strong>Deterministic code decides.</strong></p>
+              <div class="tags"><span>Go</span><span>Rust</span><span>Knowledge graphs</span><span>AI integration</span></div>
+              <p class="project-ambition">In progress: from a brief to a model and drawings.</p>
+            </div>
+
+            <figure class="motion-film brain-film" id="sebira-motion">
+              <div class="motion-placeholder" data-motion-slot="sebira">
+                <div class="film-top"><span>02 / SEBIRA</span><span>Motion preview</span></div>
+                <span class="film-play" aria-hidden="true">↗</span>
+                <p class="film-status">Your GIF goes here</p>
+                <span class="film-number" aria-hidden="true">02</span>
+              </div>
+              <figcaption><span>Reserved / SEBIRA recording</span><span>Knowledge graph → zoom into the nodes</span></figcaption>
+            </figure>
+          </div>
+
+          <div class="brain-diagram" aria-label="Second Brain system architecture">
+            <div class="diagram-top"><span>SEBIRA / From knowledge to geometry</span><span class="signal-dot" aria-hidden="true"></span></div>
+            <p class="diagram-question">“Where did this<br><i>dimension come from?”</i></p>
+
+            <div class="pipeline" role="group" aria-label="Explore the Second Brain pipeline">
+              <button class="pipeline-node active" type="button" data-stage="sources" aria-pressed="true"><span>01</span><strong>Sources</strong><small>licensed knowledge</small></button>
+              <span class="pipeline-arrow" aria-hidden="true">↓</span>
+              <button class="pipeline-node" type="button" data-stage="decisions" aria-pressed="false"><span>02</span><strong>Decisions</strong><small>verifiable evidence</small></button>
+              <span class="pipeline-arrow" aria-hidden="true">↓</span>
+              <button class="pipeline-node" type="button" data-stage="geometry" aria-pressed="false"><span>03</span><strong>Geometry</strong><small>deterministic kernel</small></button>
+            </div>
+
+            <p class="pipeline-note" id="pipeline-note" role="status" aria-live="polite">Architectural passages enter with their source and licence recorded. The knowledge graph keeps claims connected to evidence.</p>
+            <div class="diagram-footer"><span>Interactive system schematic</span><span>Select a node to look closer ↑</span></div>
+          </div>
+
+          <details class="project-detail">
+            <summary><span>Explore the reasoning pipeline</span><span class="detail-symbol" aria-hidden="true">+</span></summary>
+
+            <div class="brain-system-story">
+              <div class="story-intro">
+                <p class="eyebrow">Inside SEBIRA / Architectural intent becomes an executable system</p>
+                <h4>A line in a drawing.<br><i>A chain of reasons behind it.</i></h4>
+                <p>A language model can suggest a dimension. An architectural system has to explain it, validate it, and keep that explanation attached as it becomes geometry.</p>
+              </div>
+
+              <ol class="brain-stages">
+                <li><span>01 / Ingestion</span><h5>Read with provenance.</h5><p>Record the source, licence, jurisdiction, and passage.</p></li>
+                <li><span>02 / Knowledge</span><h5>Connect the evidence.</h5><p>Build concepts and relations with evidence attached to each edge.</p></li>
+                <li><span>03 / Brief</span><h5>Understand the intent.</h5><p>Translate the request into a typed brief and surface what is missing.</p></li>
+                <li><span>04 / Decision</span><h5>Check the claim.</h5><p>Verify quotations and jurisdiction before accepting a candidate value.</p></li>
+                <li><span>05 / Operations</span><h5>Make it executable.</h5><p>Compose supported operations with cited dimensions.</p></li>
+                <li><span>06 / Geometry</span><h5>Let the kernel decide.</h5><p>Solve wall networks and execute geometry in Rust.</p></li>
+                <li><span>07 / Drawing</span><h5>Measure what was built.</h5><p>Derive dimensioned plans and sections from the geometry.</p></li>
+                <li class="stage-in-progress"><span>08 / Builder · In progress</span><h5>Close the loop.</h5><p>Bring the model and drawings into one connected design workspace.</p></li>
+              </ol>
+
+              <div class="research-evidence">
+                <div><strong>113,152</strong><span>Architectural passages</span></div>
+                <div><strong>165</strong><span>Licence-verified sources</span></div>
+                <div><strong>489</strong><span>Backend tests with database</span></div>
+                <p>Project documentation snapshot.<br>Builder integration and drawing conventions remain in development.</p>
+              </div>
+
+              <div class="kernel-note">
+                <span class="mono">An engineering decision</span>
+                <h5>A native process boundary.<br>A more contained failure.</h5>
+                <p>The Go service invokes the Rust kernel through JSON input and output. Keeping geometry in its own process isolates kernel panics from the API — a system-design choice driven by the behavior of the geometry engine.</p>
+              </div>
+            </div>
+
+            <div class="detail-grid">
+              <div><h4>The research question</h4><p>Can a design system explain its decisions in architectural terms, connect each proposed dimension to its evidence, and turn those decisions into executable geometry?</p></div>
+              <div><h4>The system</h4><p>A Go API, PostgreSQL knowledge store, an OpenAI-compatible model endpoint, and a Rust geometry engine. The pipeline connects source passages to decisions, operations, geometry, and derived drawings.</p></div>
+              <div><h4>Where it stands</h4><p>An active research and engineering project. Integrating the builder and completing drawing conventions remain work in progress. Current work uses existing models; custom model training is a future research direction.</p><a class="text-link" href="https://github.com/starman011/secondbrain" target="_blank" rel="noopener noreferrer">Read the project overview ↗</a></div>
+            </div>
+          </details>
+        </article>
+
+        <article class="project feature feature-wfc" id="wfc" data-category="architecture systems">
+          <div class="project-heading">
+            <p class="kicker">03 / Rules into form · Experiment</p>
+            <a class="text-link" href="https://wcf.starmanodyssey.com" target="_blank" rel="noopener noreferrer">Play the original <span aria-hidden="true">↗</span></a>
+          </div>
+
+          <div class="feature-layout">
+            <div class="feature-copy">
+              <h3>Rules into possibilities<span class="title-dot">.</span></h3>
+              <p class="project-deck">How many forms<br><i>can one rule make?</i></p>
+              <p>Instead of drawing one answer, I wanted to design the rules that produce many. This Wave Function Collapse experiment turns that curiosity into a small, playable world.</p>
+              <div class="tags"><span>Wave Function Collapse</span><span>Procedural generation</span><span>Design exploration</span></div>
+            </div>
+
+            <figure class="motion-film wfc-film" id="wfc-motion">
+              <div class="motion-placeholder" data-motion-slot="wfc">
+                <div class="film-top"><span>03 / Procedural exploration</span><span>Motion preview</span></div>
+                <span class="film-play" aria-hidden="true">↗</span>
+                <p class="film-status">Your GIF goes here</p>
+                <span class="film-number" aria-hidden="true">03</span>
+              </div>
+              <figcaption><span>Reserved / Procedural generator recording</span><span>Parameters → terrain → possibilities</span></figcaption>
+            </figure>
+          </div>
+
+          <details class="project-detail">
+            <summary><span>Try a small adjacency study</span><span class="detail-symbol" aria-hidden="true">+</span></summary>
+            <div class="wfc-study">
+              <div class="diagram-top"><span>Interactive portfolio companion</span><span id="wfc-seed">Seed 024</span></div>
+              <div id="wfc-grid" class="wfc-grid" role="img" aria-label="Procedural pattern of tiles with matching edges"></div>
+              <noscript><p>In this study, neighboring tiles share connection rules. Enable JavaScript to generate patterns, or open the original WFC experiment.</p></noscript>
+              <div class="wfc-controls"><p>A new arrangement.<br>The same connection rules.</p><button type="button" id="regenerate" class="text-link">Generate another <span aria-hidden="true">↻</span></button></div>
+              <p class="study-caption">A tile-adjacency illustration made for this portfolio. Open the original for the full WFC experiment.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="project architecture-card" id="canopy" data-category="architecture">
+          <figure class="project-visual">
+            <a href="assets/architecture/canopy.jpg" target="_blank" rel="noopener" aria-label="Open BioInspired Canopy rendering at full size">
+              <img src="assets/architecture/canopy.jpg" alt="BioInspired Canopy: an undulating structure in a misty wooded landscape" width="3840" height="2160" loading="lazy">
+              <span class="image-action" aria-hidden="true">View rendering ↗</span>
+            </a>
+            <figcaption><span>04 / BioInspired Canopy</span><span>2022 · Independent study</span></figcaption>
+          </figure>
+
+          <div class="project-meta"><p class="kicker">Architecture × visual computation</p><h3>From image to inhabitable form.</h3></div>
+          <p>An exploration of image-based form generation. Python and OpenCV interpret visual references; Grasshopper and Rhino turn the resulting relationships into a variable canopy.</p>
+          <div class="tags"><span>Python / OpenCV</span><span>Grasshopper</span><span>Rhino</span></div>
+
+          <details class="project-detail">
+            <summary><span>Inside the design process</span><span class="detail-symbol" aria-hidden="true">+</span></summary>
+            <div class="process-content">
+              <p>The design investigates a sequence from image interpretation to points, lines, surfaces, and a connected mesh. Parameters give the designer a way to explore variations while retaining the structure of the system.</p>
+              <a href="assets/architecture/canopy-process.png" target="_blank" rel="noopener"><img src="assets/architecture/canopy-process.png" alt="Original Grasshopper definition for the canopy study" width="7878" height="3954" loading="lazy"></a>
+              <a href="assets/architecture/canopy-interior.jpg" target="_blank" rel="noopener"><img src="assets/architecture/canopy-interior.jpg" alt="Interior view beneath the generated canopy" width="3840" height="2160" loading="lazy"></a>
+            </div>
+          </details>
+        </article>
+
+        <article class="project architecture-card" id="voronoi" data-category="architecture">
+          <figure class="project-visual">
+            <a href="assets/architecture/voronoi.png" target="_blank" rel="noopener" aria-label="Open Voronoi Fracture rendering at full size">
+              <img src="assets/architecture/voronoi.png" alt="Red Voronoi mesh with a branching cellular structure" width="1536" height="1024" loading="lazy">
+              <span class="image-action" aria-hidden="true">View rendering ↗</span>
+            </a>
+            <figcaption><span>05 / Voronoi Fracture</span><span>2022 · Independent study</span></figcaption>
+          </figure>
+
+          <div class="project-meta"><p class="kicker">Computational geometry × material expression</p><h3>Structure in the spaces between.</h3></div>
+          <p>A mesh-subtraction study that uses Voronoi logic to explore cellular structure, porosity, and light. Built in Grasshopper and Rhino; rendered in Cinema 4D.</p>
+          <div class="tags"><span>Mesh operations</span><span>Parametric design</span><span>Cinema 4D</span></div>
+
+          <details class="project-detail">
+            <summary><span>The geometric idea</span><span class="detail-symbol" aria-hidden="true">+</span></summary>
+            <div class="process-content">
+              <p>The void becomes a design variable. Subtracting a cellular field from a volume creates a connected skeleton, opening up a study of solid and empty space through pattern, surface, and rendering.</p>
+            </div>
+          </details>
+        </article>
+
+        <article class="project engineering-study" id="applications" data-category="systems">
+          <details>
+            <summary>
+              <span class="study-number">06</span>
+              <div><p class="kicker">BIM × production automation</p><h3>Revit vendor drawing automation</h3></div>
+              <span class="study-stack">C# / Revit API / APS</span>
+              <span class="detail-symbol" aria-hidden="true">+</span>
+            </summary>
+            <div class="engineering-content">
+              <img src="assets/tech/revit-automation.png" alt="Revit model used in the vendor drawing automation project" width="1266" height="744" loading="lazy">
+              <div><p>Repetitive drawing work turns design changes into a delivery bottleneck. Revit API and APS automation translates model information into repeatable vendor drawing workflows.</p><p>I worked across software engineering, architecture, and fabrication requirements to connect the tool to the way drawings are actually used.</p></div>
+            </div>
+          </details>
+        </article>
+
+        <article class="project engineering-study" data-category="systems">
+          <details>
+            <summary>
+              <span class="study-number">07</span>
+              <div><p class="kicker">Cloud × event-driven engineering</p><h3>BIM 360 file & folder alerts</h3></div>
+              <span class="study-stack">ASP.NET / Webhooks / Azure</span>
+              <span class="detail-symbol" aria-hidden="true">+</span>
+            </summary>
+            <div class="engineering-content">
+              <img src="assets/tech/webhooks.png" alt="BIM 360 data-management application and notification interface" width="939" height="647" loading="lazy">
+              <div><p>File changes should reach the people who depend on them. An event-driven integration listens for BIM 360 and APS changes and turns them into notifications.</p><p>The project combines backend APIs, webhook handling, a management interface, and Azure deployment to reduce manual monitoring across shared engineering workflows.</p></div>
+            </div>
+          </details>
+        </article>
+
+        <article class="project engineering-study" data-category="systems">
+          <details>
+            <summary>
+              <span class="study-number">08</span>
+              <div><p class="kicker">Model intelligence × data visualization</p><h3>Making BIM data readable</h3></div>
+              <span class="study-stack">APS / Power BI / Node.js</span>
+              <span class="detail-symbol" aria-hidden="true">+</span>
+            </summary>
+            <div class="engineering-content">
+              <img src="assets/tech/model-compare.png" alt="BIM model version comparison with an ACC hierarchy and model changes" width="3020" height="1806" loading="lazy">
+              <div>
+                <p>A family of studies connecting models with their data: Power BI and APS integration, model-version comparison, and investigation of data extraction APIs for quantity takeoff.</p>
+                <p>Each asks the same question: how can an engineer move from a visual model to the exact information needed for a decision?</p>
+                <a class="text-link" href="assets/tech/powerbi.png" target="_blank" rel="noopener">View the Power BI integration ↗</a>
+              </div>
+            </div>
+          </details>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="research chapter" id="research" aria-labelledby="research-title">
+      <div class="section-shell">
+        <div class="section-index"><span>03 / The next question</span><span>Architecture → intelligence</span></div>
+
+        <div class="research-grid">
+          <div>
+            <p class="eyebrow lime">Design computation / Architectural intelligence</p>
+            <h2 id="research-title">What if a model could<br><i>reason spatially?</i></h2>
+          </div>
+
+          <div class="research-copy">
+            <p>Buildings hold more than geometry. They hold decisions, constraints, and human experience.</p>
+            <p>I want to study how AI can connect that knowledge across drawings, models, and language—and explain its design decisions. A direction I’m pursuing through SEBIRA and future doctoral research.</p>
+            <a class="text-link" href="#contact">Let’s talk about research ↗</a>
+          </div>
+        </div>
+
+        <div class="research-fields">
+          <div><span>01 / Representation</span><h3>How do we encode<br>architectural knowledge?</h3><p>Visual computing, shape-based systems, and relationships across representations.</p></div>
+          <div><span>02 / Reasoning</span><h3>How does a system<br>justify a design decision?</h3><p>Evidence, constraints, agentic workflows, and human–machine collaboration.</p></div>
+          <div><span>03 / Making</span><h3>How does intelligence<br>become buildable?</h3><p>Parametric geometry, engineering automation, and a path from intent to output.</p></div>
+        </div>
+
+        <div class="research-note"><span>My point of view</span><p>Not just the shape.<br><i>The reasons behind it.</i></p></div>
+      </div>
+    </section>
+
+    <section class="about chapter section-shell" id="about" aria-labelledby="about-title">
+      <div class="section-index"><span>04 / The person behind the work</span><span>Bangalore, India</span></div>
+
+      <div class="about-intro">
+        <div><h2 id="about-title">Architect.<br>Maker.<br><i>Still learning.</i></h2></div>
+        <div>
+          <p class="about-lede">I’m Saqlain. An architect, a builder, and always a learner.</p>
+          <p>My foundation is architecture at NIT Patna. My practice spans computational design, full-stack software, desktop tools, and AI integration.</p>
+          <p>I like the part where an unfamiliar idea becomes something I can make—and share.</p>
+          <a class="text-link" href="assets/documents/Saqlain-Khan-Resume.pdf" download>Download my résumé <span aria-hidden="true">↓</span><span class="file-kind">PDF</span></a>
+        </div>
+      </div>
+
+      <div class="experience-grid">
+        <article class="experience-card">
+          <div class="experience-top">
+            <p class="kicker">Current role / December 2025 — present</p>
+            <div class="employer-logos">
+              <div><img class="atkins-logo" src="assets/logos/atkinsrealis.svg" alt="AtkinsRéalis" width="512" height="69" loading="lazy"><span>Employer · since July 2023</span></div>
+              <span class="employer-link" aria-hidden="true">→</span>
+              <div><img class="intel-logo" src="assets/logos/Intel-logo-nobox.png" alt="Intel" width="220" height="90" loading="lazy"><span>Client-side assignment</span></div>
+            </div>
+          </div>
+
+          <h3>Software Development Engineer 1</h3>
+          <p class="employer">AtkinsRéalis · working on Intel projects</p>
+          <p>Building full-stack systems, desktop applications, and AI integrations for engineering workflows. Employed by AtkinsRéalis; working client-side on Intel projects.</p>
+          <div class="experience-foot"><span>Full-stack development</span><span>Engineering applications</span><span>AI integration</span></div>
+        </article>
+
+        <article class="experience-card">
+          <div class="experience-top">
+            <p class="kicker">Architecture / June — December 2022</p>
+            <img class="gensler-logo" src="assets/logos/gensler.svg" alt="Gensler" width="170" height="36" loading="lazy">
+          </div>
+          <h3>Architectural Intern</h3>
+          <p class="employer">Gensler · Bangalore</p>
+          <p>Workplace and hospitality projects, alongside computational design and automation with Rhino, Grasshopper, Revit, and Dynamo.</p>
+          <div class="experience-foot"><span>Computational design</span><span>Procedural geometry</span><span>Design workflows</span></div>
+        </article>
+      </div>
+
+      <details class="career-detail">
+        <summary><span>The path through AtkinsRéalis</span><span class="detail-symbol" aria-hidden="true">+</span></summary>
+        <div class="career-steps">
+          <div><span>Jul 2023 — Feb 2024</span><h4>Software Engineer Trainee</h4><p>Revit API and C# workflow automation; approximately 70% reduction in manual effort reported in my résumé.</p></div>
+          <div><span>Mar 2024 — Feb 2025</span><h4>Graduate Software Engineer</h4><p>React, Node.js, APS, BIM 360, event-driven services, and engineering visualization.</p></div>
+          <div><span>Mar — Nov 2025</span><h4>Assistant Software Engineer</h4><p>C#, WPF, MVVM, SQL Server, asynchronous programming, and enterprise application performance.</p></div>
+        </div>
+      </details>
+
+      <div class="capability-grid">
+        <div><h4>Design & computation</h4><p>Rhino · Grasshopper · Dynamo<br>Revit API · APS · BIM workflows</p></div>
+        <div><h4>Systems & intelligence</h4><p>Go · Rust · C# · Python · TypeScript<br>React · LLM integration · RAG</p></div>
+        <div><h4>Shipping & operating</h4><p>Docker · Azure · Railway · Vercel<br>CI/CD · GitHub Actions · Monitoring</p></div>
+        <div><h4>Foundation</h4><p>B.Arch · NIT Patna<br>2018–2023 · GPA 3.66 / 4.0</p></div>
+      </div>
+
+      <div class="contact" id="contact">
+        <div>
+          <p class="eyebrow">Have a question worth exploring?</p>
+          <h2>Let’s make<br><i>something meaningful.</i></h2>
+          <a class="contact-email" href="mailto:mdk.ug18.ar@nitp.ac.in">mdk.ug18.ar@nitp.ac.in <span aria-hidden="true">↗</span></a>
+        </div>
+
+        <div class="contact-aside">
+          <span>Elsewhere</span>
+          <a href="https://www.linkedin.com/in/mdsaqlainkhan" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+          <a href="https://github.com/starman011" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+          <a href="https://www.objecttracer.com" target="_blank" rel="noopener noreferrer">ObjectTracer ↗</a>
+        </div>
+      </div>
+
+      <div class="signature" aria-hidden="true">Saqlain Khan<span>↗</span></div>
+    </section>
+
+  </main>
+
+  <footer class="footer section-shell">
+    <span>© 2026 Saqlain Khan</span>
+    <span>Architecture / Code / Intelligence</span>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+</body>
+</html>

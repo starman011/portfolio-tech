@@ -1,0 +1,52 @@
+# Content and asset provenance
+
+Updated 2026-09-12. No confidential implementation files or employer screenshots were copied.
+
+## Personal and professional details
+- User-supplied SaqlainKhan-Resume.pdf: roles, dates, education, engineering achievements, contact address, original 40,000+ rendering capacity.
+- User update in this conversation: 1.5k total users according to Google Analytics; 70k+ impressions. The website supersedes the resume's older user count. These are reported analytics, not live telemetry. The downloadable PDF is the supplied original.
+- Intel role: Software Development Engineer 1, December 2025–present, Intel projects through employer AtkinsRealis. Not represented as direct Intel employment.
+- Latest positioning: architect with hands-on full-stack, desktop-application, and AI-integration experience. Management/team-count language is intentionally omitted at the user's request.
+- Gensler: Architectural Intern, Bangalore, June–December 2022.
+
+## Project descriptions
+- ObjectTracer README pasted by the user: Go workers, Redis live state, PostgreSQL trails, viewport-bounded snapshot/delta WebSocket protocol, GPU instancing, picking, lifecycle and mobile memory decisions.
+- Second Brain README pasted by the user: licensed evidence, concept graph, typed brief, validated decisions, operations, Rust kernel and dimensioned plans/sections. Builder integration and drawing conventions are explicitly in progress. No custom-trained language model is claimed.
+- SEBIRA reported documentation snapshot: 113,152 passages, 165 licence-verified sources, 489 backend tests with a database. These are not independently rerun or described as production readiness.
+- SEBIRA live destination supplied by the user: https://secondbrain-iota-eight.vercel.app/. Linked as supplied; browser capture was unavailable, and the user subsequently requested placeholders for all three project GIFs.
+- WFC description supplied in the original brief. The local tile pattern is clearly labeled as a portfolio companion illustrating adjacency, not a screenshot or full WFC implementation.
+- Canopy, Voronoi and BIM case studies: original ArchitecturePortfolio.jsx and its original image galleries.
+
+## Images
+- assets/tech/objecttracer-globe.png: retained source capture, no longer displayed in the page. Actual public ObjectTracer globe captured on 2026-09-10 at https://www.objecttracer.com/globe. No fake aircraft were added. The user will supply motion footage.
+- assets/architecture/: the user's original canopy and Voronoi renders, interior view and Grasshopper definition.
+- assets/tech/revit-automation.png, webhooks.png, model-compare.png, powerbi.png: the matching original architecture portfolio project imagery.
+- assets/logos/gensler.svg: exact official SVG from https://www.gensler.com/.
+- assets/logos/Intel-logo-nobox.png: official asset from https://download.intel.com/newsroom/2021/corporate/2021-Intel-logos.zip, linked by https://newsroom.intel.com/press-hub.
+- assets/logos/atkinsrealis.svg: original dark-grey AtkinsRéalis mark mirrored at https://commons.wikimedia.org/wiki/File:AtkinsR%C3%A9alis_logo.svg, whose source is the AtkinsRéalis brand centre asset 5521002. Unmodified SVG; CSS provides a light monochrome presentation on dark backgrounds.
+- Company marks identify professional experience, not endorsement.
+- assets/favicon.svg: portfolio initials in the approved palette.
+
+## Interactive diagrams
+
+The current opening is an original geometric study of two circular rings in perpendicular planes. Centre-path radii are fixed at 2.84 and 2.18. Ordered section shears, rotation and proportion changes produce different surface profiles while preserving both circles. Opposing in-plane spins and a shared assembly rotation maintain the 90° relationship. All 24 full-rule permutations produce distinct profiles; all 15 nonempty rule subsets are supported. The model has 14,336 locally generated points. The previous four-part braided model is superseded.
+
+The earlier research-linked T/L cell study has been superseded, and its visible research citation removed at the user's request. No research-site source code, images, footage or project results were copied. The active model is not represented as an implementation of that research or as a trained AI model. RGB encodes orientation; the light control is illustrative, not daylight analysis. Transitions interpolate particles and do not assert collision-free motion or buildability.
+
+The SEBIRA schematic and matching-edge procedural grid remain distinct from actual project footage.
+
+## Motion dependencies and references
+
+- assets/vendor/gsap.min.js and ScrollTrigger.min.js: GSAP 3.13.0, reused verbatim from the installed local dependency. License headers are retained; https://gsap.com/standard-license/.
+- Official GSAP references reviewed: https://gsap.com/docs/v3/Plugins/ScrollTrigger/ and https://gsap.com/docs/v3/GSAP/gsap.matchMedia()/.
+- React Bits Aurora, Magnet and Animated Content were reviewed for motion direction at https://reactbits.dev/ and https://github.com/DavidHDev/react-bits. No React Bits source or components are bundled. The native integration and gradient treatment are original to this portfolio; React/OGL were not added.
+- Ambient colour, the particle shader and magnetic hover are illustrative presentation effects. They do not imply project telemetry or AI activity.
+
+## Motion placeholders
+The user explicitly requested empty GIF slots and will add recordings. All three panels say “Your GIF goes here” and remain distinct from technical schematics. No simulated traffic is presented as product footage, and there are no placeholder remote requests.
+
+## North America tracking illustration
+- Subsequently requested as a separate interactive portfolio companion. The user explicitly permits mock data; the widget says “Sample traffic · not a live feed” and labels inspected objects as simulated.
+- Land geometry: public-domain Natural Earth 1:110m land, https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson. Clipped to −170…−45° longitude / 5…77° latitude, simplified by a minimum vertex spacing, then rounded to three decimals. Forty polygon outlines / 1,274 vertices. Rendered in an illustrative equirectangular view with longitude scale adjusted at 40° N.
+- Aircraft/vessel routes, approximate endpoint coordinates, identifiers, speeds, altitudes, lengths, and animated positions are authored sample data. No external tracking APIs, authentication, provider credentials, or actual flight identifiers are used.
+- The schematic is not ObjectTracer product footage; the three GIF slots remain reserved for the user's recordings.

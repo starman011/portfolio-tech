@@ -9,7 +9,7 @@
   let from=engine.particles(forms[0]),to=engine.particles(forms[1]);
   let dark=document.body.classList.contains('dark');
   const HOLD=650,MORPH=4800,REST=450;
-  let elapsed=0,mix=0,morphDuration=MORPH,angle=-.62,tilt=.68,mode=dark?'points':'wireframe',hour=10;
+  let elapsed=0,mix=0,morphDuration=MORPH,angle=-.82,tilt=.92,mode='points',hour=10;
   let separation=0,targetSeparation=0,width=0,height=0,camera;
   let paused=preference.matches,reduced=preference.matches,visible=true,active=true;
   let frame=null,last=0,dragging=false,pointer=null,previous=null;

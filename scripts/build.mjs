@@ -7,8 +7,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const output = resolve(root, 'dist');
 const html = await readFile(resolve(root, 'index.html'), 'utf8');
 const files = new Set(['index.html']);
-for (const match of html.matchAll(/\b(?:src|href)="([^"#?]+)"/g)) {
-  if (!/^(?:https?:|mailto:|data:)/.test(match[1])) files.add(match[1]);
+for (const match of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
+  if (/^(?:https?:|mailto:|data:|#)/.test(match[1])) continue;
+  const path = match[1].split(/[?#]/)[0];
+  if (path) files.add(path);
 }
 for (const path of files) {
   const destination = resolve(output, path);

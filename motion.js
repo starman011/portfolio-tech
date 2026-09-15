@@ -1,13 +1,12 @@
 /* Progressive enhancement: content and controls do not depend on animation. */
 (() => {
-  const { gsap, ScrollTrigger } = window;
-  if (!gsap || !ScrollTrigger) return;
-  gsap.registerPlugin(ScrollTrigger);
+  const { gsap } = window;
+  if (!gsap) return;
   document.body.classList.add('motion-enhanced');
   const preferences = gsap.matchMedia();
   preferences.add('(prefers-reduced-motion: no-preference)', () => {
     const field = document.querySelector('#surface-instrument');
-    gsap.from('.scene-heading, .field-introduction, .scene-enter, .scene-dock', {
+    gsap.from('.scene-heading, .field-introduction, .scene-enter, .scene-tools', {
       y: 12, opacity: 0, duration: .85, stagger: .09, ease: 'power3.out', clearProps: 'opacity,transform'
     });
     const aura = gsap.timeline({ repeat: -1, yoyo: true, paused: true })
@@ -24,24 +23,25 @@
     const off = () => aura.pause();
     window.addEventListener('pagehide', off);
     sync();
-    gsap.to('.surface-stage', {
-      y: 55, opacity: .25, ease: 'none',
-      scrollTrigger: { trigger: '#top', start: 'top top', end: 'bottom 15%', scrub: .7 }
-    });
-    const sections = gsap.utils.toArray('#path, #work > .section-head, .project-grid > .feature, #research .research-grid, #about, #contact');
-    sections.forEach(section => {
-      gsap.from(section, {
-        y: 36, opacity: .2, duration: 1.05, ease: 'power3.out', clearProps: 'opacity,transform',
-        scrollTrigger: { trigger: section, start: 'top 89%', once: true }
+    // Observe entry without ever writing the document's scroll position.
+    // ScrollTrigger.refresh() temporarily scrolled to zero on image loads and
+    // disclosure toggles. Neither is needed for these unpinned entrances.
+    const entrances = new Set();
+    const observer = 'IntersectionObserver' in window ? new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        const tween = gsap.fromTo(entry.target, { y: 18, opacity: .65 }, {
+          y: 0, opacity: 1, duration: .8, ease: 'power3.out', clearProps: 'opacity,transform',
+          onComplete: () => entrances.delete(tween)
+        });
+        entrances.add(tween);
       });
-    });
-    gsap.utils.toArray('.feature-layout .motion-film').forEach(media => {
-      gsap.from(media, {
-        y: 25, scale: .97, ease: 'none',
-        scrollTrigger: { trigger: media, start: 'top bottom', end: 'center center', scrub: .7 }
-      });
-    });
+    }, { rootMargin: '0px 0px -6% 0px', threshold: 0 }) : null;
+    gsap.utils.toArray('#path .statement-grid, #work > .section-head, .feature-copy, #research .research-grid, .about-intro, #contact > div').forEach(section => observer?.observe(section));
     return () => {
+      observer?.disconnect();
+      entrances.forEach(tween => tween.progress(1).kill());
       document.removeEventListener('portfolio:field-state', sync);
       document.removeEventListener('visibilitychange', sync);
       window.removeEventListener('pagehide', off);
@@ -67,12 +67,4 @@
       link.removeEventListener('blur', reset);
     };
   });
-  let refreshFrame = null;
-  const refresh = () => {
-    if (refreshFrame !== null) return;
-    refreshFrame = requestAnimationFrame(() => { refreshFrame = null; ScrollTrigger.refresh(); });
-  };
-  document.querySelectorAll('details').forEach(details => details.addEventListener('toggle', refresh));
-  document.querySelectorAll('img').forEach(img => img.addEventListener('load', refresh, { once: true }));
-  document.fonts?.ready.then(refresh);
 })();

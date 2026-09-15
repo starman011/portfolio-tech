@@ -111,7 +111,7 @@
     $$('[data-enabled-rule]').forEach(input=>{input.checked=enabled.includes(input.dataset.enabledRule);input.disabled=input.checked&&enabled.length===1;});
     $('#generate-building').disabled=forms.length<2;
     const off=paused||reduced;
-    $('.motion-toggle').textContent=reduced?'Still':off?'Play ▷':'Pause Ⅱ';
+    $('.motion-toggle').textContent=reduced?'Still':off?'Play':'Pause';
     $('.motion-toggle').disabled=reduced;$('.motion-toggle').setAttribute('aria-pressed',String(off));
     $('.motion-toggle').setAttribute('aria-label',reduced?'Animation disabled by reduced motion preference':off?'Play form permutations':'Pause form permutations');
     instrument.dataset.playing=String(!off);
@@ -152,8 +152,10 @@
     if(!width||!height)return;
     const c=Math.cos(angle),s=Math.sin(angle),ct=Math.cos(tilt),st=Math.sin(tilt);
     const compact=matchMedia('(max-width: 900px)').matches;
-    const scale=Math.min(width*.152,(height-(compact?36:140))/6.4)/(1+.12*separation);
-    camera={scale,x:width*.5,y:height*(compact?.50:.42)};
+    // Reserve a full circular envelope through every rotation; the form owns
+    // the opening while the copy and controls sit outside its central silhouette.
+    const scale=Math.min(width*(compact?.156:.19),(height-(compact?24:64))/6.4)/(1+.12*separation);
+    camera={scale,x:width*.5,y:height*(compact?.50:.46)};
     const project=p=>[camera.x+(p[0]*c-p[1]*s)*scale,camera.y+((p[0]*s+p[1]*c)*ct-p[2]*st)*scale];
     const view=[s*st,c*st,ct],sun=[Math.cos((hour-6)/12*Math.PI),0,Math.sin((hour-6)/12*Math.PI)];
     const matrix=new Float32Array([2*scale*c/width,-2*scale*s*ct/height,-s*st/30,0,-2*scale*s/width,-2*scale*c*ct/height,-c*st/30,0,0,2*scale*st/height,-ct/30,0,2*camera.x/width-1,1-2*camera.y/height,0,1]);

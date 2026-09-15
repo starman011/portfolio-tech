@@ -2,7 +2,7 @@
 
 A static portfolio that tells the story of one practice across architecture, computational design, production software, and architectural AI.
 
-Open index.html directly, or serve this folder with a local web server. No install is required; GSAP and ScrollTrigger are included locally.
+Open index.html directly, or serve this folder with a local web server. No install is required; GSAP is included locally.
 
 - `npm run check` validates script syntax, local references, image alternatives and section links.
 - `npm run build` creates a portable public-only `dist/` bundle.
@@ -17,9 +17,9 @@ Spec Kit was initialized with the installed Specify CLI. Project principles are 
 
 Theme tokens are at the start of styles.css; hero.css owns the model-first opening and editorial refinements. The model and project interactions use native browser APIs and guard unavailable storage. GSAP progressively enhances entrances and scroll transitions. Continuous hero motion stops outside the viewport and respects reduced-motion preferences. Core content stays readable without JavaScript.
 
-## Add the three GIFs
+## Project recordings
 
-The three reserved panels are intentional placeholders, as requested. No recording is fetched or simulated.
+ObjectTracer now uses the existing `assets/motion/1.mp4` recording. SEBIRA and WFC retain intentional placeholders for the user's recordings. The three `data-motion-slot` hooks are preserved for future replacement.
 
 In `index.html`, replace the entire `div` bearing the matching `data-motion-slot` attribute with your image, keeping its surrounding `figure`:
 
@@ -49,11 +49,11 @@ Every form has 14,336 corresponding particles: 224 path samples × 32 section sa
 
 Each rule responds to one click: it swaps one position forward in the sequence (wrapping at the end), and changes the ring profile in about one second. The operation is highlighted and its new position announced. Shuffle, pause, orbit, Home/reset, subsets and separation remain. While paused or under reduced motion, manual changes are immediate and do not restart rotation.
 
-motion.js uses locally bundled GSAP 3.13.0 and ScrollTrigger for chapter entrances, a gentle hero retreat, ambient light drift, and bounded pointer hover. It does not pin sections or replace native scrolling. Motion preferences revert these enhancements; missing GSAP leaves the page and geometry functional.
+motion.js uses locally bundled GSAP 3.13.0 with IntersectionObserver for gentle entrances, ambient light drift and bounded pointer hover. It never writes scroll or focus. ScrollTrigger is no longer loaded: its image/disclosure refresh path temporarily reset document scroll. Native reading progress drives the small hero retreat. Motion preferences revert enhancements; missing GSAP leaves the page and geometry functional.
 
-The Dots / Wireframe / RGB normals switch preserves the form and camera. Light mode initially selects Wireframe; a saved dark theme initially selects Dots. Theme changes preserve the chosen view. Wireframe uses 5,376 unique edges along closed cross-sections, with no edges bridging the two rings.
+The Dots / Wireframe / RGB normals switch preserves the form and camera. Dots is the initial mode in both themes. Theme changes preserve the chosen view. Wireframe uses 5,376 unique edges along closed cross-sections, with no edges bridging the two rings. Controls live behind “Explore the form +”; pause remains immediately available. The larger camera framing reserves a circular envelope through each rotation.
 
-Project narratives, three GIF placeholders, research, and the closing experience chapter remain. The old shape-grammar.js, building-model.js and webgl-model.js files are retained as prior iterations but are no longer loaded or used by the active checks.
+focus.css refines the existing theme: restrained accents, readable data, fewer exposed controls and detailed project disclosures. ObjectTracer explains the journey from scattered signals to a spatial interface. Architecture and BIM studies retain their process and implementation details behind “+”. The old shape-grammar.js, building-model.js and webgl-model.js files are retained as prior iterations but are no longer loaded or used by the active checks.
 
 ## North America tracking companion
 

@@ -42,8 +42,13 @@ The SEBIRA schematic and matching-edge procedural grid remain distinct from actu
 - React Bits Aurora, Magnet and Animated Content were reviewed for motion direction at https://reactbits.dev/ and https://github.com/DavidHDev/react-bits. No React Bits source or components are bundled. The native integration and gradient treatment are original to this portfolio; React/OGL were not added.
 - Ambient colour, the particle shader and magnetic hover are illustrative presentation effects. They do not imply project telemetry or AI activity.
 
-## Motion placeholders
-The user explicitly requested empty GIF slots and will add recordings. All three panels say “Your GIF goes here” and remain distinct from technical schematics. No simulated traffic is presented as product footage, and there are no placeholder remote requests.
+## Project recordings
+The ObjectTracer panel preserves the user's local `assets/motion/1.mp4` recording. SEBIRA and WFC retain “Your GIF goes here” slots. These remain distinct from technical schematics. No simulated traffic is presented as product footage, and there are no placeholder remote requests.
+
+## September 15 refinements
+The original ArchitecturePortfolio.jsx project data supplied the canopy workflow, Voronoi subtraction process, drawing automation, webhook application, Power BI integration, model comparison and data-extraction investigation. Copy distinguishes design studies from engineering validation and avoids treating historical API comparisons as current pricing or compatibility guidance. Existing portfolio images were reused; no additional employer material was accessed.
+
+ScrollTrigger remains on disk as a previous dependency but is no longer loaded by the page. Native observers trigger GSAP entrances without changing the scroll position.
 
 ## North America tracking illustration
 - Subsequently requested as a separate interactive portfolio companion. The user explicitly permits mock data; the widget says “Sample traffic · not a live feed” and labels inspected objects as simulated.

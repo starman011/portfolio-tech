@@ -1,5 +1,18 @@
-# Verification — model-first permutation field
-Updated 2026-09-12.
+# Verification — focus and progressive detail
+Updated 2026-09-15.
+
+## Current pass
+
+- `npm run build` passes geometry checks for all 64 ordered rule sequences, source/asset checks, the new scroll-free motion lifecycle regression and bundle generation (26 files).
+- Browser preview inspected through localhost. Direct file-URL inspection is unavailable through the browser tool.
+- Confirmed a stale script in the preview (old playback text despite updated server code). Versioned changed asset URLs now load the current code; the build strips query strings when copying files.
+- The original bottom jump was not reliably reproduced. Source inspection found that ScrollTrigger refresh temporarily sets document scroll to zero on lazy-image loads and disclosure toggles. Removed this dependency from the page; IntersectionObserver drives the remaining GSAP entrances without writing scroll or focus.
+- In-browser: all four rule buttons change the sequence; Wireframe and Dots switch correctly; pause/play and the disclosed controls work. The two-ring model is larger and still initially uses Dots.
+- Opened the sample map (18 objects), canopy process (four stages) and BIM collection (three distinct studies). Closing disclosures and scrolling to the footer after lazy images load leaves scrollY equal to the maximum scroll position. No desktop horizontal overflow was observed.
+- Mobile hero visually inspected at 390 × 844; the large dot form, identity and collapsed controls fit the screen. Desktop inspection used 1280 × 800. Viewport override is reset after testing.
+- The existing ObjectTracer MP4 is preserved. SEBIRA and WFC retain their reserved recording slots. Resume and employer/client attribution are unchanged.
+
+## Earlier checks (2026-09-12)
 
 ## Checks performed
 
@@ -18,9 +31,9 @@ Updated 2026-09-12.
 
 Reproducible geometry/static check: npm run check. The temporary interaction harnesses are /private/tmp/portfolio-field-check.cjs and /private/tmp/portfolio-motion-check.cjs, using the workspace's existing jsdom/PostCSS installation rather than new project dependencies.
 
-## Limits
+## Earlier verification limits
 
-Direct browser inspection was attempted but rejected by the usage-limit approval check; it was not bypassed. No screenshot or real-device QA was performed. jsdom exercises the Canvas 2D fallback and GSAP lifecycle, not GPU shader compilation, visual WebGL appearance, physical touch gestures or device performance. Circularity and perpendicularity were verified mathematically instead.
+The September 12 pass could not perform browser inspection. The current pass adds browser screenshots and UI interaction checks, but not physical-device performance or touch testing. Earlier jsdom and mocked WebGL checks are not GPU performance benchmarks. Circularity and perpendicularity remain mathematically verified.
 
 This is an original deterministic geometric experiment, not trained AI, a structural model or daylight analysis. Distinct operations produce different point coordinates; no claim is made that each is structurally buildable.
 

@@ -10,10 +10,11 @@ assert(!/scrollTo\s*\(|scrollIntoView\s*\(|\.focus\s*\(|ScrollTrigger/.test(sour
 assert(html.includes('width="3024" height="1686"'), 'Reserve the Power BI image ratio');
 assert(html.includes('width="712" height="467"'), 'Reserve the extraction image ratio');
 for (const text of ['Interpret', 'Construct', 'Subtract', 'Webhook event', 'Version comparison', 'API investigation']) assert(html.includes(text), 'Missing restored process: ' + text);
+for (const text of ['Fascinated by', 'The questions I keep following', 'student of things I don’t understand yet']) assert(html.includes(text), 'Missing personal narrative: ' + text);
 
 // Exercise the entrance lifecycle without a browser or external dependencies.
 const observers = [], cleanups = [], events = new Map(), tweens = [];
-const node = { dataset: { playing: 'false' }, addEventListener() {}, removeEventListener() {}, querySelector() { return node; } };
+const node = { dataset: { playing: 'false' }, matches: () => false, addEventListener() {}, removeEventListener() {}, querySelector() { return node; } };
 const eventTarget = {
   addEventListener(name, fn) { events.set(name, fn); },
   removeEventListener(name) { events.delete(name); }

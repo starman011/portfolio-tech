@@ -11,6 +11,7 @@ Updated 2026-09-15.
 - Opened the sample map (18 objects), canopy process (four stages) and BIM collection (three distinct studies). Closing disclosures and scrolling to the footer after lazy images load leaves scrollY equal to the maximum scroll position. No desktop horizontal overflow was observed.
 - Mobile hero visually inspected at 390 × 844; the large dot form, identity and collapsed controls fit the screen. Desktop inspection used 1280 × 800. Viewport override is reset after testing.
 - The existing ObjectTracer MP4 is preserved. SEBIRA and WFC retain their reserved recording slots. Resume and employer/client attribution are unchanged.
+- Follow-up refinement: body copy uses 16px sizing; controls and metadata have clearer hierarchy. The supplied personal writing is condensed into the existing narrative and a native “+” disclosure. Existing static/build checks were rerun; the earlier desktop/mobile screenshots preceded this follow-up typography and copy pass.
 
 ## Earlier checks (2026-09-12)
 

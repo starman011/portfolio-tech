@@ -1,6 +1,6 @@
 # Content and asset provenance
 
-Updated 2026-09-12. No confidential implementation files or employer screenshots were copied.
+Updated 2026-09-15. No confidential implementation files or employer screenshots were copied.
 
 ## Personal and professional details
 - User-supplied SaqlainKhan-Resume.pdf: roles, dates, education, engineering achievements, contact address, original 40,000+ rendering capacity.
@@ -49,6 +49,8 @@ The ObjectTracer panel preserves the user's local `assets/motion/1.mp4` recordin
 The original ArchitecturePortfolio.jsx project data supplied the canopy workflow, Voronoi subtraction process, drawing automation, webhook application, Power BI integration, model comparison and data-extraction investigation. Copy distinguishes design studies from engineering validation and avoids treating historical API comparisons as current pricing or compatibility guidance. Existing portfolio images were reused; no additional employer material was accessed.
 
 ScrollTrigger remains on disk as a previous dependency but is no longer loaded by the page. Native observers trigger GSAP entrances without changing the scroll position.
+
+The personal narrative is adapted from the user's September 15 writing, supplied in attachment `0dbc6fa0-0723-42c8-b7b2-d54d0c163888/pasted-text.txt`. Short passages shape the practice, ObjectTracer and about chapters; a condensed reflection is available under “The questions I keep following.” Defensive career-transition wording is omitted, and the writing does not add career credentials or claim a trained architectural model.
 
 ## North America tracking illustration
 - Subsequently requested as a separate interactive portfolio companion. The user explicitly permits mock data; the widget says “Sample traffic · not a live feed” and labels inspected objects as simulated.

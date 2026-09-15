@@ -4,23 +4,23 @@
   const stage=canvas.parentElement,instrument=document.querySelector('#surface-instrument');
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const context=canvas.getContext('2d');if(!context)return;
-  const engine=window.PermutationField,preference=matchMedia('(prefers-reduced-motion: reduce)');
+  const engine=window.PermutationField,city=window.CityJourney,journey=city.createJourney(),preference=matchMedia('(prefers-reduced-motion: reduce)');
   let enabled=[...engine.rules],forms=engine.enumerate(enabled),index=0,nextIndex=1,lastRule=null;
   let from=engine.particles(forms[0]),to=engine.particles(forms[1]);
   let dark=document.body.classList.contains('dark');
   const HOLD=650,MORPH=4800,REST=450;
   let elapsed=0,mix=0,morphDuration=MORPH,angle=-.82,tilt=.92,mode='points',hour=10;
   let separation=0,targetSeparation=0,width=0,height=0,camera;
-  let paused=preference.matches,reduced=preference.matches,visible=true,active=true;
+  let paused=preference.matches,reduced=preference.matches,visible=true,lingering=true,active=true;
   let frame=null,last=0,dragging=false,pointer=null,previous=null;
-  let gpu=null,clock=0;
+  let gpu=null,clock=0,journeyUI='';
 
   function createGPU(){
     if(!window.WebGLRenderingContext)return null;
     const element=document.createElement('canvas');element.className='model-gpu-surface';element.setAttribute('aria-hidden','true');
     let gl;try{gl=element.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});}catch{return null;}
     if(!gl)return null;
-    let program,buffer,wireBuffer,attributes,uniforms,lost=false,dirty=true;
+    let program,buffer,wireBuffer,attributes,uniforms,cityGPU,lost=false,dirty=true;
     const vertex=`precision highp float;
       attribute vec3 aFrom; attribute vec3 aTo; attribute vec3 aNormal; attribute vec3 aTargetNormal; attribute float aGroup;
       uniform mat4 uMatrix; uniform float uMix; uniform float uSize; uniform float uSeparate; uniform float uTime;
@@ -42,11 +42,11 @@
       }`;
     const fragment=`precision mediump float;
       varying mediump vec3 vNormal; varying mediump float vAlpha; varying mediump float vGroup;
-      uniform vec3 uInk; uniform vec3 uAccent; uniform int uMode;
+      uniform vec3 uInk; uniform vec3 uAccent; uniform int uMode; uniform float uFocus;
       void main(){
         vec3 color=mix(uInk,uAccent,mod(floor(vGroup),2.0));
         if(uMode==2)color=normalize(vNormal)*.38+.5;
-        float alpha=vAlpha;
+        float alpha=vAlpha*(1.0-uFocus*.72);
         if(uMode!=1){
           float d=length(gl_PointCoord-vec2(.5));if(d>.5)discard;
           alpha*=1.0-smoothstep(.32,.5,d);
@@ -60,8 +60,9 @@
       if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('Point renderer unavailable');
       buffer=gl.createBuffer();attributes=['aFrom','aTo','aNormal','aTargetNormal','aGroup'].map(n=>gl.getAttribLocation(program,n));
       wireBuffer=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,wireBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,engine.wireIndices,gl.STATIC_DRAW);
-      uniforms=Object.fromEntries(['uMatrix','uMix','uSize','uSeparate','uTime','uView','uSun','uInk','uAccent','uMode','uPose0','uPose1'].map(n=>[n,gl.getUniformLocation(program,n)]));
+      uniforms=Object.fromEntries(['uMatrix','uMix','uSize','uSeparate','uTime','uView','uSun','uInk','uAccent','uMode','uPose0','uPose1','uFocus'].map(n=>[n,gl.getUniformLocation(program,n)]));
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.clearColor(0,0,0,0);dirty=true;
+      delete canvas.dataset.cityIssue;cityGPU=window.CityRenderer.create(gl,message=>{canvas.dataset.cityIssue=message;});
     }
     try{initialize();}catch{return null;}
     stage.append(element);
@@ -69,7 +70,9 @@
     element.addEventListener('webglcontextrestored',()=>{try{initialize();lost=false;element.hidden=false;}catch{lost=true;}draw();});
     return {invalidate(){dirty=true;},draw(matrix,view,sun,poses){
       if(lost||gl.isContextLost())return false;
-      const dpr=Math.min(devicePixelRatio||1,2),w=Math.round(width*dpr),h=Math.round(height*dpr);
+      if(journey.state.focus>.045&&!cityGPU){element.hidden=true;return false;}
+      element.hidden=false;
+      const dpr=Math.min(devicePixelRatio||1,journey.state.focus>.045?(width<700?1.25:1.5):2),w=Math.round(width*dpr),h=Math.round(height*dpr);
       if(element.width!==w||element.height!==h){element.width=w;element.height=h;}
       gl.viewport(0,0,w,h);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
       if(dirty){
@@ -86,9 +89,13 @@
       const accent=dark?(mode==='wireframe'?[.88,.95,.91]:[.64,.96,.81]):ink;
       gl.uniform3fv(uniforms.uInk,ink);gl.uniform3fv(uniforms.uAccent,accent);
       gl.uniform1i(uniforms.uMode,mode==='normals'?2:mode==='wireframe'?1:0);
+      gl.uniform1f(uniforms.uFocus,journey.state.focus);
+      gl.depthMask(false);
       if(mode==='wireframe'){
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,wireBuffer);gl.lineWidth(1);gl.drawElements(gl.LINES,engine.wireIndices.length,gl.UNSIGNED_SHORT,0);
       }else gl.drawArrays(gl.POINTS,0,from.count);
+      gl.depthMask(true);
+      canvas.dataset.buildings=String(cityGPU?.draw({matrix,poses,from,to,mix,...journey.state,separation,sun,dark,mode,compact:width<700})||0);
       return true;
     }};
   }
@@ -97,7 +104,7 @@
     $('#permutation-total').textContent=enabled.length+' rule'+(enabled.length===1?'':'s')+' · '+forms.length+' permutation'+(forms.length===1?'':'s');
     const instruction=enabled.length===1?'Enable another rule to compare forms.':lastRule?lastRule+' moved to step '+(forms[index].order.indexOf(lastRule)+1)+'.':'Tap a rule. Change the form.';
     if($('#grammar-description').textContent!==instruction)$('#grammar-description').textContent=instruction;
-    canvas.setAttribute('aria-label','Two circular rings in perpendicular planes at 90 degrees, in '+(mode==='normals'?'RGB normals':mode==='wireframe'?'wireframe':'dots')+' view. Surface operations: '+forms[index].order.join(', ')+'. Arrangement '+(index+1)+' of '+forms.length+'. Drag or use arrow keys to orbit. Home resets the view.');
+    canvas.setAttribute('aria-label','Two circular rings at 90 degrees. Their dots reveal procedural buildings when you look closer. '+(mode==='normals'?'RGB normals':mode==='wireframe'?'Wireframe':'Dots')+' view. Surface operations: '+forms[index].order.join(', ')+'. Arrangement '+(index+1)+' of '+forms.length+'. Drag or use arrow keys to look around. Home returns to the whole form.');
     canvas.dataset.variation=String(index+1);canvas.dataset.count=String(forms.length);canvas.dataset.order=forms[index].order.join('/');
     canvas.dataset.orientation=angle.toFixed(3);canvas.dataset.points=String(from.count);
     const bar=$('.grammar-steps'),focused=document.activeElement;
@@ -113,14 +120,31 @@
     const off=paused||reduced;
     $('.motion-toggle').textContent=reduced?'Still':off?'Play':'Pause';
     $('.motion-toggle').disabled=reduced;$('.motion-toggle').setAttribute('aria-pressed',String(off));
-    $('.motion-toggle').setAttribute('aria-label',reduced?'Animation disabled by reduced motion preference':off?'Play form permutations':'Pause form permutations');
+    $('.motion-toggle').setAttribute('aria-label',reduced?'Animation disabled by reduced motion preference':off?'Play form and camera':'Pause form and camera');
     instrument.dataset.playing=String(!off);
     document.dispatchEvent(new CustomEvent('portfolio:field-state',{detail:{playing:!off&&visible&&active&&!document.hidden}}));
+    updateJourney();
+  }
+  function updateJourney(){
+    const state=journey.state,closer=state.focus>.001||state.moving;
+    canvas.dataset.journeyProgress=state.focus.toFixed(3);
+    const key=[state.phase,closer,reduced,paused].join('/');if(key===journeyUI)return;journeyUI=key;
+    $('#city-journey').textContent=closer?'Whole form':'Look closer';
+    $('#city-journey').setAttribute('aria-label',closer?'Return to the whole form':'Look closer: reveal the procedural buildings');
+    $('#city-journey').setAttribute('aria-pressed',String(closer));
+    canvas.dataset.journey=state.phase;
+    instrument.dataset.journey=state.phase;
+    const caption=state.phase==='overview'?(reduced?'A world inside each point.':'Stay a little. There’s more inside.'):
+      state.phase==='city'?'A point becomes a place.':state.phase==='return'?'A different way to see the whole.':'From a field of points to a field of possibilities.';
+    if($('#journey-caption').textContent!==caption)$('#journey-caption').textContent=caption;
+    const status=state.phase==='city'?'Close-up of a procedural city. '+(paused||reduced?'Motion is paused.':'The camera glides along the ring.')+' Whole form returns to the rings.':
+      state.phase==='overview'?'The whole form. Two perpendicular rings of points.':'';
+    if(status&&$('#journey-status').textContent!==status)$('#journey-status').textContent=status;
   }
   function appearance(){
     $$('[data-surface-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.surfaceMode===mode)));
     canvas.dataset.mode=mode;canvas.dataset.theme=dark?'dark':'light';
-    $('#surface-readout').textContent=mode==='normals'?'Surface orientation, encoded in RGB.':'Two circles at 90°. Rules change the profile, not the circular paths.';
+    $('#surface-readout').textContent=mode==='normals'?'Surface orientation, encoded in RGB.':'Eight building families. The same rules change their volumes and the rings beneath them. A procedural study, not a real city.';
   }
   function blendedNormal(i){
     const n=[0,1,2].map(d=>from.normals[i*3+d]*(1-mix)+to.normals[i*3+d]*mix),length=Math.hypot(...n)||1;
@@ -128,6 +152,7 @@
   }
   function snapshot(){
     const current={...from,positions:new Float32Array(from.positions.length),normals:new Float32Array(from.normals.length)};
+    current.cityForms=city.boxes.map((_,type)=>city.modules(type,from).map((box,j)=>box.map((v,d)=>v*(1-mix)+city.modules(type,to)[j][d]*mix)));
     for(let i=0;i<from.count;i++){
       current.normals.set(blendedNormal(i),i*3);
       for(let d=0;d<3;d++)current.positions[i*3+d]=from.positions[i*3+d]*(1-mix)+to.positions[i*3+d]*mix;
@@ -136,7 +161,7 @@
   }
   function advance(){
     from=to;index=nextIndex;nextIndex=(index+1)%forms.length;
-    to=engine.particles(forms[nextIndex]);elapsed=0;mix=0;morphDuration=MORPH;lastRule=null;
+    to=engine.particles(forms[nextIndex]);elapsed=0;mix=0;morphDuration=journey.state.focus>.9?10000:MORPH;lastRule=null;
     gpu?.invalidate();update();draw();schedule();
   }
   function vertexAt(i,poses){
@@ -156,47 +181,51 @@
     // the opening while the copy and controls sit outside its central silhouette.
     const scale=Math.min(width*(compact?.156:.19),(height-(compact?24:64))/6.4)/(1+.12*separation);
     camera={scale,x:width*.5,y:height*(compact?.50:.46)};
-    const project=p=>[camera.x+(p[0]*c-p[1]*s)*scale,camera.y+((p[0]*s+p[1]*c)*ct-p[2]*st)*scale];
     const view=[s*st,c*st,ct],sun=[Math.cos((hour-6)/12*Math.PI),0,Math.sin((hour-6)/12*Math.PI)];
-    const matrix=new Float32Array([2*scale*c/width,-2*scale*s*ct/height,-s*st/30,0,-2*scale*s/width,-2*scale*c*ct/height,-c*st/30,0,0,2*scale*st/height,-ct/30,0,2*camera.x/width-1,1-2*camera.y/height,0,1]);
+    const overview=new Float32Array([2*scale*c/width,-2*scale*s*ct/height,-s*st/30,0,-2*scale*s/width,-2*scale*c*ct/height,-c*st/30,0,0,2*scale*st/height,-ct/30,0,2*camera.x/width-1,1-2*camera.y/height,0,1]);
     const poses=engine.motion(clock);
+    const matrix=city.camera({overview,from,to,mix,poses,...journey.state,separation,aspect:width/height,yaw:angle+.82,pitch:tilt-.92});
+    const project=p=>city.project(matrix,p,width,height);
     context.clearRect(0,0,width,height);
     const rendered=gpu?.draw(matrix,view,sun,poses);canvas.dataset.renderer=rendered?'webgl':'canvas';
     if(!rendered){
       const vertices=Array.from({length:from.count},(_,i)=>{
         const vertex=vertexAt(i,poses),n=vertex.normal;
         const facing=Math.abs(n.reduce((v,x,d)=>v+x*view[d],0)),light=Math.max(0,n.reduce((v,x,d)=>v+x*sun[d],0));
-        vertex.alpha=.20+.50*facing+.16*vertex.pulse+.10*light;
+        vertex.alpha=(.20+.50*facing+.16*vertex.pulse+.10*light)*(1-journey.state.focus*.72);
         vertex.p=project(vertex.p);return vertex;
       });
       if(mode==='wireframe'){
         const lines=Array.from({length:8},()=>[]);
         for(let i=0;i<engine.wireIndices.length;i+=2){
           const a=engine.wireIndices[i],b=engine.wireIndices[i+1],bucket=Math.min(7,Math.floor((vertices[a].alpha+vertices[b].alpha)*4));
+          if(!vertices[a].p||!vertices[b].p)continue;
           lines[bucket].push(a,b);
         }
         context.strokeStyle=dark?'#e0f2e8':'#141714';context.lineWidth=.8;context.lineCap='round';
         lines.forEach((indices,bucket)=>{
           context.globalAlpha=(bucket+.5)/8;context.beginPath();
-          for(let i=0;i<indices.length;i+=2){context.moveTo(...vertices[indices[i]].p);context.lineTo(...vertices[indices[i+1]].p);}
+          for(let i=0;i<indices.length;i+=2){const a=vertices[indices[i]].p,b=vertices[indices[i+1]].p;context.moveTo(a[0],a[1]);context.lineTo(b[0],b[1]);}
           context.stroke();
         });
       }else{
         const buckets=Array.from({length:16},()=>[]),radius=width<600?.72:.96;
-        vertices.forEach(vertex=>buckets[Math.min(7,Math.floor(vertex.alpha*8))+(vertex.part%2)*8].push(vertex));
+        vertices.forEach(vertex=>{if(vertex.p&&vertex.p[0]>-20&&vertex.p[0]<width+20&&vertex.p[1]>-20&&vertex.p[1]<height+20)buckets[Math.min(7,Math.floor(vertex.alpha*8))+(vertex.part%2)*8].push(vertex);});
         buckets.forEach((items,b)=>{
           context.globalAlpha=(b%8+.5)/8;
           if(mode==='normals'){
-            for(const {p,normal,pulse} of items){context.fillStyle='rgb('+normal.map(n=>Math.round((n*.38+.5)*255)).join(',')+')';context.beginPath();context.arc(...p,radius*(.85+pulse*.7),0,Math.PI*2);context.fill();}
+            for(const {p,normal,pulse} of items){context.fillStyle='rgb('+normal.map(n=>Math.round((n*.38+.5)*255)).join(',')+')';context.beginPath();context.arc(p[0],p[1],radius*(.85+pulse*.7),0,Math.PI*2);context.fill();}
           }else{
             context.fillStyle=dark?(b<8?'#e9bd8c':'#b4eed1'):'#141714';context.beginPath();
-            for(const {p,pulse} of items){const r=radius*(.85+pulse*.7);context.moveTo(p[0]+r,p[1]);context.arc(...p,r,0,Math.PI*2);}context.fill();
+            for(const {p,pulse} of items){const r=radius*(.85+pulse*.7);context.moveTo(p[0]+r,p[1]);context.arc(p[0],p[1],r,0,Math.PI*2);}context.fill();
           }
         });
       }
+      canvas.dataset.buildings=String(window.CityRenderer.fallback(context,{matrix,poses,from,to,mix,...journey.state,separation,sun,dark,mode,width,height}));
     }
     context.globalAlpha=1;canvas.dataset.mix=mix.toFixed(3);canvas.dataset.clock=clock.toFixed(3);
     instrument.style.setProperty('--loop-progress',String(elapsed/(HOLD+morphDuration+REST)));
+    updateJourney();
   }
   const canAnimate=()=>!reduced&&visible&&active&&!document.hidden&&((!paused&&!dragging)||Math.abs(separation-targetSeparation)>.001);
   function tick(time){
@@ -204,7 +233,9 @@
     if(!last||time-last>=(canvas.dataset.renderer==='webgl'?15:32)){
       const delta=last?Math.min(time-last,100):16;last=time;
       if(!paused&&!dragging){
-        clock+=delta/1000;elapsed+=delta;if(elapsed>=HOLD+morphDuration+REST)advance();
+        journey.advance(delta/1000,{present:lingering,inspecting:$('#scene-inspector').open});
+        clock+=delta/1000*(1-journey.state.focus*.85);elapsed+=delta;
+        if(elapsed>=HOLD+morphDuration+REST&&(journey.state.focus<.2||journey.state.focus>.995))advance();
         const t=Math.max(0,Math.min(1,(elapsed-HOLD)/morphDuration));mix=t*t*t*(10+t*(6*t-15));
       }
       separation+=(targetSeparation-separation)*(1-Math.exp(-delta/170));draw();
@@ -233,10 +264,11 @@
   }));
   $('#generate-building').addEventListener('click',()=>choose(forms[(index+7)%forms.length].order));
   $('.motion-toggle').addEventListener('click',()=>{paused=!paused;update();schedule();});
+  $('#city-journey').addEventListener('click',()=>{journey.request(journey.state.focus>.001||journey.state.moving?0:1,reduced||paused);updateJourney();draw();schedule();});
   $$('[data-surface-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.surfaceMode;appearance();update();draw();}));
   $('#sun-time').addEventListener('input',event=>{hour=Number(event.target.value);const time=String(Math.floor(hour)).padStart(2,'0')+':'+String(Math.round(hour%1*60)).padStart(2,'0');$('#sun-time-value').value=$('#sun-time-value').textContent=time;draw();});
   $('#explode-pavilion').addEventListener('click',()=>{targetSeparation=targetSeparation?0:1;$('#explode-pavilion').setAttribute('aria-pressed',String(!!targetSeparation));$('#explode-pavilion').textContent=targetSeparation?'Gather the field':'Open the field';if(reduced)separation=targetSeparation;instrument.dataset.assembly=targetSeparation?'exploded':'assembled';draw();schedule();});
-  const reset=()=>{angle=-.62;tilt=.68;update();draw();};$('#reset-pavilion').addEventListener('click',reset);
+  const reset=()=>{angle=-.82;tilt=.92;journey.request(0,reduced||paused);update();draw();schedule();};$('#reset-pavilion').addEventListener('click',reset);
   canvas.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home'].includes(event.key))return;event.preventDefault();if(event.key==='Home')reset();else if(event.key==='ArrowLeft')angle-=.13;else if(event.key==='ArrowRight')angle+=.13;else tilt=Math.max(.25,Math.min(1.55,tilt+(event.key==='ArrowUp'?-.08:.08)));update();draw();});
   canvas.addEventListener('pointerdown',event=>{if(event.button!==0||dragging)return;dragging=true;pointer=event.pointerId;previous={x:event.clientX,y:event.clientY};canvas.setPointerCapture?.(pointer);canvas.classList.add('is-dragging');schedule();});
   canvas.addEventListener('pointermove',event=>{if(!dragging||event.pointerId!==pointer)return;angle+=(event.clientX-previous.x)*.007;if(event.pointerType!=='touch')tilt=Math.max(.25,Math.min(1.55,tilt+(event.clientY-previous.y)*.004));previous={x:event.clientX,y:event.clientY};update();draw();},{passive:true});
@@ -246,8 +278,8 @@
   document.addEventListener('pointerdown',event=>{if(inspector.open&&!inspector.contains(event.target))inspector.open=false;});
   document.addEventListener('portfolio:theme',()=>{dark=document.body.classList.contains('dark');appearance();draw();});
   document.addEventListener('visibilitychange',schedule);
-  preference.addEventListener('change',event=>{reduced=event.matches;if(reduced){mix=0;elapsed=0;separation=targetSeparation;}update();schedule();draw();});
-  if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;schedule();},{threshold:.05}).observe(canvas);
+  preference.addEventListener('change',event=>{reduced=event.matches;if(reduced){mix=0;elapsed=0;separation=targetSeparation;journey.request(0,true);}update();schedule();draw();});
+  if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;lingering=entries[0].intersectionRatio>.55;schedule();},{threshold:[0,.05,.55]}).observe(canvas);
   if('ResizeObserver' in window)new ResizeObserver(resize).observe(canvas);else window.addEventListener('resize',resize);
   window.addEventListener('pagehide',()=>{active=false;schedule();});window.addEventListener('pageshow',()=>{active=true;schedule();});
   gpu=createGPU();appearance();update();resize();schedule();

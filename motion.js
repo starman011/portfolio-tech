@@ -31,14 +31,16 @@
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
         observer.unobserve(entry.target);
-        const tween = gsap.fromTo(entry.target, { y: 18, opacity: .65 }, {
-          y: 0, opacity: 1, duration: .8, ease: 'power3.out', clearProps: 'opacity,transform',
+        const visual = entry.target.matches('.motion-film, .project-visual');
+        const tween = gsap.fromTo(entry.target, { y: visual ? 26 : 16, scale: visual ? .975 : 1, opacity: .65 }, {
+          y: 0, scale: 1, opacity: 1, duration: visual ? 1.15 : .85, delay: visual ? .08 : 0,
+          ease: 'power3.out', clearProps: 'opacity,transform',
           onComplete: () => entrances.delete(tween)
         });
         entrances.add(tween);
       });
     }, { rootMargin: '0px 0px -6% 0px', threshold: 0 }) : null;
-    gsap.utils.toArray('#path .statement-grid, #work > .section-head, .feature-copy, #research .research-grid, .about-intro, #contact > div').forEach(section => observer?.observe(section));
+    gsap.utils.toArray('#path .statement-grid, #work > .section-head, .feature-copy, .motion-film, .project-visual, #research .research-grid, .about-intro, #contact > div').forEach(section => observer?.observe(section));
     return () => {
       observer?.disconnect();
       entrances.forEach(tween => tween.progress(1).kill());

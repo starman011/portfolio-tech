@@ -14,6 +14,12 @@
   };
   const themeButton = $('.theme-toggle');
   const applyTheme = (dark) => {
+    // Keep the browser's colour-scheme in sync with the authored canvas/DOM theme.
+    // Plain "light" permits automatic darkening, which can invert DOM colours
+    // while leaving the canvas's black dots unchanged. "only light" opts out.
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    $('meta[name="color-scheme"]')?.setAttribute('content', dark ? 'dark' : 'only light');
+    $('meta[name="theme-color"]')?.setAttribute('content', dark ? '#181c19' : '#eee9de');
     body.classList.toggle('dark', dark);
     themeButton?.setAttribute('aria-pressed', String(dark));
     themeButton?.setAttribute('aria-label', dark ? 'Use light theme' : 'Use dark theme');
@@ -22,10 +28,20 @@
     document.dispatchEvent(new Event('portfolio:theme'));
   };
   applyTheme(preference.get('sk-theme') === 'dark');
-  themeButton?.addEventListener('click', () => {
+  themeButton?.addEventListener('click', async () => {
+    if(themeButton.disabled)return;
     const dark = !body.classList.contains('dark');
-    applyTheme(dark);
-    preference.set('sk-theme', dark ? 'dark' : 'light');
+    let committed=false;
+    const commit=()=>{if(committed)return;committed=true;applyTheme(dark);preference.set('sk-theme',dark?'dark':'light');};
+    if(motionPreference.matches||typeof document.startViewTransition!=='function'){commit();return;}
+    themeButton.disabled=true;
+    try{
+      const transition=document.startViewTransition(commit);
+      // A failed/overridden transition must still leave the requested theme applied.
+      transition.ready.catch(()=>{});
+      await transition.finished;
+    }catch{commit();}
+    finally{themeButton.disabled=false;}
   });
 
   const menuButton = $('.menu-toggle');

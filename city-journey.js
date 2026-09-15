@@ -15,16 +15,16 @@ window.CityJourney=(()=>{
   const seed=i=>{let n=Math.imul(i+17,1597334677);n^=n>>>16;n=Math.imul(n,2246822519);return (n>>>0)/4294967296;};
   const index=(u,v=0,part=0)=>wrap(u,224)*64+part*32+wrap(v,32);
   const boxes=[
-    [[0,.08,0,1,.16,1],[0,.36,0,.68,.40,.74],[0,.70,0,.42,.28,.46]],
-    [[0,.14,0,1,.28,1],[-.16,.41,0,.68,.26,.82],[-.28,.64,0,.42,.20,.64]],
-    [[-.36,.29,0,.28,.58,1],[.36,.39,0,.28,.78,1],[0,.19,-.36,.44,.38,.28],[0,.19,.36,.44,.38,.28]],
-    [[0,.10,0,1,.20,1],[-.14,.36,0,.52,.32,.74],[.04,.64,0,.80,.24,.56],[.16,.85,0,.44,.18,.52]],
-    [[0,.06,0,1,.12,1],[-.3,.47,0,.32,.70,.68],[.3,.38,0,.32,.52,.68],[0,.60,0,.28,.12,.42]],
-    [[-.35,.21,0,.30,.42,1],[.15,.14,-.34,.70,.28,.32]],
-    [[-.33,.32,0,.28,.64,.62],[.33,.32,0,.28,.64,.62],[0,.69,0,.94,.18,.70]],
-    [[0,.10,0,.94,.20,.94],[0,.34,0,.64,.28,.42],[0,.57,0,.42,.18,.86],[0,.79,0,.28,.26,.34]]
+    [[0,.38,0,.66,.76,.66]],
+    [[0,.15,0,.94,.30,.88],[0,.44,0,.60,.28,.64]],
+    [[-.32,.26,0,.30,.52,.80],[.16,.16,-.25,.66,.32,.30]],
+    [[-.13,.17,0,.66,.34,.72],[.13,.47,0,.66,.26,.56]],
+    [[-.26,.39,0,.32,.78,.56],[.26,.27,0,.32,.54,.56]],
+    [[0,.16,0,.92,.32,.82]],
+    [[-.30,.25,0,.24,.50,.48],[.30,.25,0,.24,.50,.48],[0,.57,0,.84,.14,.56]],
+    [[0,.18,0,.82,.36,.40],[0,.45,0,.40,.18,.82]]
   ];
-  const typologies=['Setback tower','Stepped terraces','Courtyard','Offset stack','Paired towers','Garden court','Bridge house','Cross-axis stack'];
+  const typologies=['Cube','Step','L-form','Offset pair','Twin blocks','Slab','Bridge','Cross'];
   const layoutCache=new Map();
   function modules(type,form){
     if(form?.cityForms)return form.cityForms[type];
@@ -64,7 +64,7 @@ window.CityJourney=(()=>{
           focus=transition.from+(transition.target-transition.from)*ease(transition.time/transition.duration);
           if(transition.time>=transition.duration){focus=transition.target;transition=null;}
         }else if(automatic){dwell+=dt;focus=ease((dwell-9)/18);}
-        if(focus>.9)route+=dt*.34;
+        if(focus>.9)route+=dt*.34*ease((focus-.9)/.1);
         return state();
       }
     };
@@ -101,6 +101,17 @@ window.CityJourney=(()=>{
     for(let u=center-radius;u<=center+radius;u+=2)for(let v=0;v<32;v+=2)ids.push(index(u,v));
     return ids;
   }
+  function detailWeight(i,route,compact=false){
+    const radius=compact?12:20,distance=Math.abs(wrap(Math.floor(i/64)-(44+route)+112,224)-112);
+    const t=clamp((distance-(radius-6))/4);
+    return 1-t*t*(3-2*t);
+  }
+  // A cyclic Catmull–Rom path has matching velocities at sample boundaries.
+  // Linear segments preserved position but introduced a small camera jerk at each dot.
+  const spline=(points,t)=>points[0].map((_,d)=>{
+    const [a,b,c,e]=points.map(p=>p[d]);
+    return .5*(2*b+(-a+c)*t+(2*a-5*b+4*c-e)*t*t+(-a+3*b-3*c+e)*t*t*t);
+  });
   function perspective(eye,target,up,aspect){
     const z=unit(sub(eye,target)),x=unit(cross(up,z)),y=cross(z,x);
     const f=1/Math.tan(.43),near=.008,far=35,a=(far+near)/(near-far),b=2*far*near/(near-far);
@@ -116,10 +127,10 @@ window.CityJourney=(()=>{
   function camera({overview,from,to,mix,poses,separation=0,focus,route,aspect,yaw=0,pitch=0}){
     if(focus===0)return new Float32Array(overview);
     const u=44+route,base=Math.floor(u),fraction=u-base;
-    const a=blendBasis(from,to,index(base),mix),b=blendBasis(from,to,index(base+1),mix);
-    const lerp=(x,y)=>add(mul(x,1-fraction),mul(y,fraction));
-    const p=rotate(poses[0],lerp(a.p,b.p)),n=unit(rotate(poses[0],lerp(a.n,b.n)));
-    const tangent=unit(rotate(poses[0],lerp(a.tangent,b.tangent))),side=unit(cross(tangent,n));
+    const samples=[-1,0,1,2].map(offset=>blendBasis(from,to,index(base+offset),mix));
+    const interpolate=key=>rotate(poses[0],spline(samples.map(sample=>sample[key]),fraction));
+    const p=interpolate('p'),n=unit(interpolate('n')),along=interpolate('tangent');
+    const tangent=unit(sub(along,mul(n,dot(along,n)))),side=unit(cross(tangent,n));
     p[0]-=separation*.35;
     const turn=Math.max(-1,Math.min(1,yaw))*.65;
     const back=add(mul(tangent,-.34*Math.cos(turn)),mul(side,.18+.25*Math.sin(turn)));
@@ -153,5 +164,5 @@ window.CityJourney=(()=>{
     }
     return new Float32Array(vertices);
   }
-  return {createJourney,seed,index,boxes,typologies,modules,typeAt,faceCorners,faceNormals,basis,blendBasis,dimensions,patch,camera,project,prototype,rotate,add,mul,dot};
+  return {createJourney,seed,index,boxes,typologies,modules,typeAt,faceCorners,faceNormals,basis,blendBasis,dimensions,patch,detailWeight,camera,project,prototype,rotate,add,mul,dot};
 })();

@@ -3,6 +3,16 @@ import { readFile } from 'node:fs/promises';
 import { Script, createContext } from 'node:vm';
 
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const baseStyles = await readFile(new URL('../styles.css', import.meta.url), 'utf8');
+const focusStyles = await readFile(new URL('../focus.css', import.meta.url), 'utf8');
+const heroStyles = await readFile(new URL('../hero.css', import.meta.url), 'utf8');
+assert(html.includes('<meta name="color-scheme" content="only light">'), 'Opt out of auto-darkening before styles/scripts load');
+assert(/:root\s*\{[^}]*color-scheme:\s*only light/.test(baseStyles), 'The authored light palette must opt out of browser recolouring');
+assert(/:root\[data-theme="dark"\]\s*\{color-scheme:dark/.test(baseStyles), 'Declare the authored dark theme at the document root');
+assert(!/color-scheme:\s*light\b/.test(heroStyles), 'A hero override must not re-enable automatic darkening');
+assert(!/\.theme-toggle\s*>\s*span:first-child/.test(baseStyles), 'The legacy half-circle selector must not override the animated switch');
+assert(/\.theme-toggle\s*>\s*\.theme-track\s*\{[^}]*width:\s*44px;[^}]*height:\s*26px;/.test(focusStyles), 'Keep the full-size animated theme track');
+assert.equal((html.match(/class="theme-track"/g)||[]).length, 1, 'Render exactly one current theme switch');
 const motion = await readFile(new URL('../motion.js', import.meta.url), 'utf8');
 assert(!/<script[^>]+ScrollTrigger/.test(html), 'Scroll-resetting plugin must not be loaded');
 const source = motion.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\//g, '');

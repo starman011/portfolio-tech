@@ -5,6 +5,7 @@ import { Script } from 'node:vm';
 import './check-permutation.mjs';
 import './check-focus.mjs';
 import './check-city.mjs';
+import './check-interactions.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = await readFile(resolve(root, 'index.html'), 'utf8');

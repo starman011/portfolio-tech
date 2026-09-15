@@ -41,6 +41,12 @@ The SEBIRA schematic and matching-edge procedural grid remain distinct from actu
 - Official GSAP references reviewed: https://gsap.com/docs/v3/Plugins/ScrollTrigger/ and https://gsap.com/docs/v3/GSAP/gsap.matchMedia()/.
 - React Bits Aurora, Magnet and Animated Content were reviewed for motion direction at https://reactbits.dev/ and https://github.com/DavidHDev/react-bits. No React Bits source or components are bundled. The native integration and gradient treatment are original to this portfolio; React/OGL were not added.
 - Ambient colour, the particle shader and magnetic hover are illustrative presentation effects. They do not imply project telemetry or AI activity.
+- Igloo (https://igloo.inc/), supplied by the user, was visually reviewed for scene continuity, changes of scale and pacing. No Igloo assets, models, textures, source code or text were copied.
+- The creators' technical account, https://www.awwwards.com/igloo-inc-case-study.html, was read on September 15 through a text-only fetch. Abeto describes Three.js/Svelte/GSAP, Houdini/Blender assets, custom shaders, procedural crystal growth, compressed volume-driven particles and staged texture/shader loading. This research informs proposed rendering improvements; those systems have not been added to this portfolio.
+- Native theme-transition behavior was checked against MDN: https://developer.mozilla.org/en-US/docs/Web/API/Document/startViewTransition. The implementation includes feature detection and reduced-motion fallback.
+- Browser automatic-darkening opt-out follows Chrome's documented `color-scheme: only light` and early metadata approach: https://developer.chrome.com/blog/auto-dark-theme#how-to-opt-out-of-auto-dark-theme. The site's own dark palette and accessible controls remain available.
+
+The September 15 close-up extends the original point field with locally generated, simple cuboid assemblies. Buildings are rooted at sampled point locations and rise along the radial vector from the ring centreline through their dot. The ring geometry is held during the camera journey. The shaded materials, highlights and origin markers are original illustrative rendering, not scanned assets, physical lighting analysis or trained-model output.
 
 ## Project recordings
 The ObjectTracer panel preserves the user's local `assets/motion/1.mp4` recording. SEBIRA and WFC retain “Your GIF goes here” slots. These remain distinct from technical schematics. No simulated traffic is presented as product footage, and there are no placeholder remote requests.

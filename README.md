@@ -51,7 +51,21 @@ Each rule responds to one click: it swaps one position forward in the sequence (
 
 motion.js uses locally bundled GSAP 3.13.0 with IntersectionObserver for gentle entrances, ambient light drift and bounded pointer hover. It never writes scroll or focus. ScrollTrigger is no longer loaded: its image/disclosure refresh path temporarily reset document scroll. Native reading progress drives the small hero retreat. Motion preferences revert enhancements; missing GSAP leaves the page and geometry functional.
 
-The Dots / Wireframe / RGB normals switch preserves the form and camera. Dots is the initial mode in both themes. Theme changes preserve the chosen view. Wireframe uses 5,376 unique edges along closed cross-sections, with no edges bridging the two rings. Controls live behind “Explore the form +”; pause remains immediately available. The larger camera framing reserves a circular envelope through each rotation.
+The Dots / Wireframe / RGB normals switch preserves the form and camera. Dots is the initial mode in both themes. Theme changes preserve the chosen view. Wireframe uses 5,376 unique edges along closed cross-sections, with no edges bridging the two rings. Controls live behind “Form +”; pause and “Look closer” remain immediately available. The larger camera framing reserves a circular envelope through each rotation.
+
+### A city within the points
+
+`city-journey.js` adds a bounded change of scale to the original form. After nine seconds in the opening, an eighteen-second approach reveals architectural volumes. “Look closer” starts an eight-second approach directly; “Whole form” returns in four seconds. Pause stops both the form and the camera. Reduced motion makes manual changes immediate and disables automatic travel. Hidden/offscreen pages and an open inspector suspend the camera journey.
+
+Entering the close-up captures the current geometry and stops its rotation and profile morphing. The dots remain still while the independent camera glides along the ring. Manual rule changes affect only building assemblies until returning to the whole form. Every building rises radially from its own dot, with a small foundation. The complete point field remains visible; occupied dots are also drawn as small origin markers over the volumes.
+
+The camera follows a cyclic Catmull–Rom path with a gradual speed ramp. At the moving detail patch's edges, buildings and their extra origin markers fade before their instance rows are replaced. The original full point field is unchanged.
+
+Eight deliberately simple families—cube, step, L-form, offset pair, twins, slab, bridge and cross—combine one to three basic volumes. The rule order changes these assemblies. They are deterministic geometric studies, not trained AI or buildable designs. Shaded forms are the default close-up; wireframe remains optional. Illustrative material highlights and contact shading replace the former window grids; this is not a photorealistic lighting simulation.
+
+`city-renderer.js` reuses the existing WebGL context and shared instanced meshes. Detailed geometry is limited to 336 nearby buildings on desktop, 208 on smaller canvases, and 192 in the Canvas fallback. Close-up pixel density is capped at 1.5× desktop / 1.25× mobile. Mesh buffers change only for new rule configurations; instance buffers update when the neighborhood changes. This reduces rendering work, but is not a measured frame-rate guarantee.
+
+The sun/moon toggle uses native same-document view transitions where available, with a direct theme change fallback and reduced-motion support. The theme preference remains optional: denied browser storage never prevents switching. The root, body, canvas and browser metadata stay synchronized; `only light` prevents automatic browser darkening from recolouring the light UI while leaving the model dots black.
 
 focus.css refines the existing theme: restrained accents, readable data, fewer exposed controls and detailed project disclosures. ObjectTracer explains the journey from scattered signals to a spatial interface. Architecture and BIM studies retain their process and implementation details behind “+”. The old shape-grammar.js, building-model.js and webgl-model.js files are retained as prior iterations but are no longer loaded or used by the active checks.
 

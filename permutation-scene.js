@@ -13,17 +13,18 @@
   let separation=0,targetSeparation=0,width=0,height=0,camera;
   let paused=preference.matches,reduced=preference.matches,visible=true,lingering=true,active=true;
   let frame=null,last=0,dragging=false,pointer=null,previous=null;
-  let gpu=null,clock=0,journeyUI='';
+  let gpu=null,clock=0,journeyUI='',closeFrozen=false,cityMorph=false;
 
   function createGPU(){
     if(!window.WebGLRenderingContext)return null;
     const element=document.createElement('canvas');element.className='model-gpu-surface';element.setAttribute('aria-hidden','true');
     let gl;try{gl=element.getContext('webgl',{alpha:true,antialias:true,premultipliedAlpha:false});}catch{return null;}
     if(!gl)return null;
-    let program,buffer,wireBuffer,attributes,uniforms,cityGPU,lost=false,dirty=true;
+    let program,buffer,wireBuffer,anchorBuffer,anchorKey='',anchorCount=0,attributes,uniforms,cityGPU,lost=false,dirty=true;
     const vertex=`precision highp float;
       attribute vec3 aFrom; attribute vec3 aTo; attribute vec3 aNormal; attribute vec3 aTargetNormal; attribute float aGroup;
       uniform mat4 uMatrix; uniform float uMix; uniform float uSize; uniform float uSeparate; uniform float uTime;
+      uniform float uAnchor; uniform float uRoute; uniform float uDetailRadius;
       uniform vec3 uView; uniform vec3 uSun;
       uniform mat3 uPose0; uniform mat3 uPose1;
       varying mediump vec3 vNormal; varying mediump float vAlpha; varying mediump float vGroup;
@@ -38,6 +39,9 @@
         float pulse=pow(max(0.0,cos(along*18.84956-uTime*.65)),12.0);
         vNormal=n;vGroup=aGroup;
         vAlpha=.20+.50*abs(dot(n,uView))+.16*pulse+.10*max(0.0,dot(n,uSun));
+        float distance=abs(mod(along*224.0-uRoute+112.0,224.0)-112.0);
+        float presence=1.0-smoothstep(uDetailRadius-6.0,uDetailRadius-2.0,distance);
+        vAlpha*=mix(1.0,presence,uAnchor);
         gl_Position=uMatrix*vec4(p,1.0);gl_PointSize=uSize*(.85+pulse*.7);
       }`;
     const fragment=`precision mediump float;
@@ -46,7 +50,7 @@
       void main(){
         vec3 color=mix(uInk,uAccent,mod(floor(vGroup),2.0));
         if(uMode==2)color=normalize(vNormal)*.38+.5;
-        float alpha=vAlpha*(1.0-uFocus*.72);
+        float alpha=vAlpha*(1.0-uFocus*.18);
         if(uMode!=1){
           float d=length(gl_PointCoord-vec2(.5));if(d>.5)discard;
           alpha*=1.0-smoothstep(.32,.5,d);
@@ -60,7 +64,8 @@
       if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('Point renderer unavailable');
       buffer=gl.createBuffer();attributes=['aFrom','aTo','aNormal','aTargetNormal','aGroup'].map(n=>gl.getAttribLocation(program,n));
       wireBuffer=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,wireBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,engine.wireIndices,gl.STATIC_DRAW);
-      uniforms=Object.fromEntries(['uMatrix','uMix','uSize','uSeparate','uTime','uView','uSun','uInk','uAccent','uMode','uPose0','uPose1','uFocus'].map(n=>[n,gl.getUniformLocation(program,n)]));
+      anchorBuffer=gl.createBuffer();anchorKey='';
+      uniforms=Object.fromEntries(['uMatrix','uMix','uSize','uSeparate','uTime','uView','uSun','uInk','uAccent','uMode','uPose0','uPose1','uFocus','uAnchor','uRoute','uDetailRadius'].map(n=>[n,gl.getUniformLocation(program,n)]));
       gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.clearColor(0,0,0,0);dirty=true;
       delete canvas.dataset.cityIssue;cityGPU=window.CityRenderer.create(gl,message=>{canvas.dataset.cityIssue=message;});
     }
@@ -84,6 +89,7 @@
       gl.uniformMatrix4fv(uniforms.uMatrix,false,matrix);gl.uniform1f(uniforms.uMix,mix);gl.uniform1f(uniforms.uTime,clock);gl.uniform1f(uniforms.uSeparate,separation);
       poses.forEach((pose,i)=>gl.uniformMatrix3fv(uniforms['uPose'+i],false,pose));
       gl.uniform1f(uniforms.uSize,(width<600?1.75:2.5)*dpr);
+      gl.uniform1f(uniforms.uAnchor,0);gl.uniform1f(uniforms.uRoute,((44+journey.state.route)%224+224)%224);gl.uniform1f(uniforms.uDetailRadius,width<700?12:20);
       gl.uniform3fv(uniforms.uView,view);gl.uniform3fv(uniforms.uSun,sun);
       const ink=dark?(mode==='wireframe'?[.88,.95,.91]:[.97,.73,.50]):[.08,.09,.08];
       const accent=dark?(mode==='wireframe'?[.88,.95,.91]:[.64,.96,.81]):ink;
@@ -96,6 +102,17 @@
       }else gl.drawArrays(gl.POINTS,0,from.count);
       gl.depthMask(true);
       canvas.dataset.buildings=String(cityGPU?.draw({matrix,poses,from,to,mix,...journey.state,separation,sun,dark,mode,compact:width<700})||0);
+      if(mode==='points'&&journey.state.focus>.045){
+        // Redraw only the occupied dots as origin markers, legible through their volumes.
+        const key=Math.floor((44+journey.state.route)/2)+':'+(width<700);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,anchorBuffer);
+        if(key!==anchorKey){const ids=new Uint16Array(city.patch(journey.state.route,width<700));anchorCount=ids.length;gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,ids,gl.STATIC_DRAW);anchorKey=key;}
+        gl.useProgram(program);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+        [3,3,3,3,1].forEach((size,i)=>{gl.enableVertexAttribArray(attributes[i]);gl.vertexAttribPointer(attributes[i],size,gl.FLOAT,false,52,[0,12,24,36,48][i]);});
+        gl.uniform1f(uniforms.uSize,3.2*dpr);gl.uniform1f(uniforms.uFocus,0);gl.uniform1f(uniforms.uAnchor,1);
+        gl.uniform3fv(uniforms.uInk,dark?[.76,.92,.70]:[.08,.09,.08]);gl.uniform3fv(uniforms.uAccent,dark?[.76,.92,.70]:[.08,.09,.08]);
+        gl.disable(gl.DEPTH_TEST);gl.depthMask(false);gl.drawElements(gl.POINTS,anchorCount,gl.UNSIGNED_SHORT,0);gl.depthMask(true);gl.enable(gl.DEPTH_TEST);
+      }
       return true;
     }};
   }
@@ -144,7 +161,7 @@
   function appearance(){
     $$('[data-surface-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.surfaceMode===mode)));
     canvas.dataset.mode=mode;canvas.dataset.theme=dark?'dark':'light';
-    $('#surface-readout').textContent=mode==='normals'?'Surface orientation, encoded in RGB.':'Eight building families. The same rules change their volumes and the rings beneath them. A procedural study, not a real city.';
+    $('#surface-readout').textContent=mode==='normals'?'Surface orientation, encoded in RGB.':closeFrozen?'The dots stay still while the camera glides. Change the rules to combine simple building volumes.':'Eight basic assemblies. Change their order. Look closer to hold the form and explore its buildings.';
   }
   function blendedNormal(i){
     const n=[0,1,2].map(d=>from.normals[i*3+d]*(1-mix)+to.normals[i*3+d]*mix),length=Math.hypot(...n)||1;
@@ -161,8 +178,24 @@
   }
   function advance(){
     from=to;index=nextIndex;nextIndex=(index+1)%forms.length;
-    to=engine.particles(forms[nextIndex]);elapsed=0;mix=0;morphDuration=journey.state.focus>.9?10000:MORPH;lastRule=null;
+    to=engine.particles(forms[nextIndex]);elapsed=0;mix=0;morphDuration=MORPH;lastRule=null;
     gpu?.invalidate();update();draw();schedule();
+  }
+  function freezeField(){
+    if(closeFrozen)return;
+    from=snapshot();to=from;mix=0;elapsed=0;closeFrozen=true;cityMorph=false;
+    gpu?.invalidate();appearance();
+  }
+  function thawField(){
+    if(!closeFrozen)return;
+    from=snapshot();nextIndex=(index+1)%forms.length;to=engine.particles(forms[nextIndex]);mix=0;elapsed=0;morphDuration=MORPH;
+    closeFrozen=false;cityMorph=false;gpu?.invalidate();appearance();
+  }
+  function setJourney(target){
+    if(target)freezeField();
+    journey.request(target,reduced||paused);
+    if(!journey.state.focus&&!journey.state.moving)thawField();
+    updateJourney();draw();schedule();
   }
   function vertexAt(i,poses){
     const group=from.groups[i],part=Math.floor(group),along=group-part;
@@ -192,7 +225,7 @@
       const vertices=Array.from({length:from.count},(_,i)=>{
         const vertex=vertexAt(i,poses),n=vertex.normal;
         const facing=Math.abs(n.reduce((v,x,d)=>v+x*view[d],0)),light=Math.max(0,n.reduce((v,x,d)=>v+x*sun[d],0));
-        vertex.alpha=(.20+.50*facing+.16*vertex.pulse+.10*light)*(1-journey.state.focus*.72);
+        vertex.alpha=(.20+.50*facing+.16*vertex.pulse+.10*light)*(1-journey.state.focus*.18);
         vertex.p=project(vertex.p);return vertex;
       });
       if(mode==='wireframe'){
@@ -222,8 +255,16 @@
         });
       }
       canvas.dataset.buildings=String(window.CityRenderer.fallback(context,{matrix,poses,from,to,mix,...journey.state,separation,sun,dark,mode,width,height}));
+      if(mode==='points'&&journey.state.focus>.045){
+        context.fillStyle=dark?'#c1ebb2':'#141714';
+        for(const i of city.patch(journey.state.route,true)){
+          const p=vertices[i].p,presence=city.detailWeight(i,journey.state.route,true);if(!p||presence<.001)continue;
+          context.globalAlpha=.8*presence;context.beginPath();context.arc(p[0],p[1],1.4,0,Math.PI*2);context.fill();
+        }
+      }
     }
     context.globalAlpha=1;canvas.dataset.mix=mix.toFixed(3);canvas.dataset.clock=clock.toFixed(3);
+    canvas.dataset.geometryFrozen=String(closeFrozen);canvas.dataset.cameraRoute=journey.state.route.toFixed(3);
     instrument.style.setProperty('--loop-progress',String(elapsed/(HOLD+morphDuration+REST)));
     updateJourney();
   }
@@ -234,9 +275,16 @@
       const delta=last?Math.min(time-last,100):16;last=time;
       if(!paused&&!dragging){
         journey.advance(delta/1000,{present:lingering,inspecting:$('#scene-inspector').open});
-        clock+=delta/1000*(1-journey.state.focus*.85);elapsed+=delta;
-        if(elapsed>=HOLD+morphDuration+REST&&(journey.state.focus<.2||journey.state.focus>.995))advance();
-        const t=Math.max(0,Math.min(1,(elapsed-HOLD)/morphDuration));mix=t*t*t*(10+t*(6*t-15));
+        if(journey.state.focus>0)freezeField();
+        else if(!journey.state.moving)thawField();
+        if(!closeFrozen){
+          clock+=delta/1000;elapsed+=delta;
+          if(elapsed>=HOLD+morphDuration+REST)advance();
+        }else if(cityMorph)elapsed+=delta;
+        if(!closeFrozen||cityMorph){
+          const t=Math.max(0,Math.min(1,(elapsed-HOLD)/morphDuration));mix=t*t*t*(10+t*(6*t-15));
+          if(closeFrozen&&t===1){from=to;mix=0;cityMorph=false;gpu?.invalidate();}
+        }
       }
       separation+=(targetSeparation-separation)*(1-Math.exp(-delta/170));draw();
     }
@@ -247,8 +295,14 @@
   function choose(order,rule=null){
     const target=forms.findIndex(f=>f.signature===order.join('/'));
     if(target<0)return;
-    from=snapshot();index=target;nextIndex=index;to=engine.particles(forms[index]);elapsed=HOLD;mix=0;morphDuration=1050;
-    if(reduced||paused){from=to;nextIndex=(index+1)%forms.length;to=engine.particles(forms[nextIndex]);elapsed=0;}
+    from=snapshot();index=target;nextIndex=index;elapsed=HOLD;mix=0;morphDuration=1050;
+    if(closeFrozen){
+      to={...from,signature:forms[index].signature,cityForms:city.boxes.map((_,type)=>city.modules(type,forms[index]))};cityMorph=true;
+      if(reduced||paused){from=to;cityMorph=false;elapsed=0;}
+    }else{
+      to=engine.particles(forms[index]);
+      if(reduced||paused){from=to;nextIndex=(index+1)%forms.length;to=engine.particles(forms[nextIndex]);elapsed=0;}
+    }
     lastRule=rule;gpu?.invalidate();update();draw();schedule();
   }
   $$('[data-rule]').forEach(button=>button.addEventListener('click',()=>{
@@ -264,11 +318,11 @@
   }));
   $('#generate-building').addEventListener('click',()=>choose(forms[(index+7)%forms.length].order));
   $('.motion-toggle').addEventListener('click',()=>{paused=!paused;update();schedule();});
-  $('#city-journey').addEventListener('click',()=>{journey.request(journey.state.focus>.001||journey.state.moving?0:1,reduced||paused);updateJourney();draw();schedule();});
+  $('#city-journey').addEventListener('click',()=>setJourney(journey.state.focus>.001||journey.state.moving?0:1));
   $$('[data-surface-mode]').forEach(button=>button.addEventListener('click',()=>{mode=button.dataset.surfaceMode;appearance();update();draw();}));
   $('#sun-time').addEventListener('input',event=>{hour=Number(event.target.value);const time=String(Math.floor(hour)).padStart(2,'0')+':'+String(Math.round(hour%1*60)).padStart(2,'0');$('#sun-time-value').value=$('#sun-time-value').textContent=time;draw();});
   $('#explode-pavilion').addEventListener('click',()=>{targetSeparation=targetSeparation?0:1;$('#explode-pavilion').setAttribute('aria-pressed',String(!!targetSeparation));$('#explode-pavilion').textContent=targetSeparation?'Gather the field':'Open the field';if(reduced)separation=targetSeparation;instrument.dataset.assembly=targetSeparation?'exploded':'assembled';draw();schedule();});
-  const reset=()=>{angle=-.82;tilt=.92;journey.request(0,reduced||paused);update();draw();schedule();};$('#reset-pavilion').addEventListener('click',reset);
+  const reset=()=>{angle=-.82;tilt=.92;setJourney(0);update();};$('#reset-pavilion').addEventListener('click',reset);
   canvas.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home'].includes(event.key))return;event.preventDefault();if(event.key==='Home')reset();else if(event.key==='ArrowLeft')angle-=.13;else if(event.key==='ArrowRight')angle+=.13;else tilt=Math.max(.25,Math.min(1.55,tilt+(event.key==='ArrowUp'?-.08:.08)));update();draw();});
   canvas.addEventListener('pointerdown',event=>{if(event.button!==0||dragging)return;dragging=true;pointer=event.pointerId;previous={x:event.clientX,y:event.clientY};canvas.setPointerCapture?.(pointer);canvas.classList.add('is-dragging');schedule();});
   canvas.addEventListener('pointermove',event=>{if(!dragging||event.pointerId!==pointer)return;angle+=(event.clientX-previous.x)*.007;if(event.pointerType!=='touch')tilt=Math.max(.25,Math.min(1.55,tilt+(event.clientY-previous.y)*.004));previous={x:event.clientX,y:event.clientY};update();draw();},{passive:true});
@@ -278,7 +332,7 @@
   document.addEventListener('pointerdown',event=>{if(inspector.open&&!inspector.contains(event.target))inspector.open=false;});
   document.addEventListener('portfolio:theme',()=>{dark=document.body.classList.contains('dark');appearance();draw();});
   document.addEventListener('visibilitychange',schedule);
-  preference.addEventListener('change',event=>{reduced=event.matches;if(reduced){mix=0;elapsed=0;separation=targetSeparation;journey.request(0,true);}update();schedule();draw();});
+  preference.addEventListener('change',event=>{reduced=event.matches;if(reduced){separation=targetSeparation;setJourney(0);}update();schedule();draw();});
   if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;lingering=entries[0].intersectionRatio>.55;schedule();},{threshold:[0,.05,.55]}).observe(canvas);
   if('ResizeObserver' in window)new ResizeObserver(resize).observe(canvas);else window.addEventListener('resize',resize);
   window.addEventListener('pagehide',()=>{active=false;schedule();});window.addEventListener('pageshow',()=>{active=true;schedule();});

@@ -76,7 +76,7 @@ body.dark .primary-nav a:hover,body.dark .primary-nav a[aria-current] {backgroun
 #explode-pavilion[aria-pressed="true"] {background:#c6f04c;color:#172015}
 .hero-spatial .surface-readout {margin:13px 0 0;font:.75rem/1.6 var(--sans);text-align:left;color:var(--field-muted)}
 /* The global theme applies to the model and its glass controls as well. */
-body:not(.dark) .hero-spatial .surface-instrument {--field-text:#20231f;--field-muted:#626a60;--field-line:rgba(32,35,31,.17);background:#efecdf;border-color:rgba(255,255,255,.8);color-scheme:light}
+body:not(.dark) .hero-spatial .surface-instrument {--field-text:#20231f;--field-muted:#626a60;--field-line:rgba(32,35,31,.17);background:#efecdf;border-color:rgba(255,255,255,.8);color-scheme:only light}
 body:not(.dark) .field-aura {background:radial-gradient(ellipse at 50% 40%,#faf8f0 0%,#efecdf 64%,#e7e6d8 100%)}
 body:not(.dark) .aura-light {opacity:.09}
 body:not(.dark) .scene-dock,body:not(.dark) .hero-spatial .scene-views {background:rgba(250,248,241,.83);box-shadow:0 10px 32px #20231f09,inset 0 1px 0 #fff9}
@@ -279,7 +279,7 @@ body:not(.dark) .hero-spatial .surface-instrument {
   background:#f7f4ec;
   border-color:rgba(17,17,17,.08);
   color:#111;
-  color-scheme:light;
+  color-scheme:only light;
 }
 
 body:not(.dark) .field-aura {

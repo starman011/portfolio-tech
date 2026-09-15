@@ -21,6 +21,28 @@ assert.equal(new Set(city.patch(10000)).size,336,'Bound the close-up patch, even
 assert.equal(city.patch(0,true).length,208);
 assert(city.patch(10000).every(i=>i>=0&&i<14336&&i%64<32));
 const forms=engine.enumerate(),overview=new Float32Array([.31,0,0,0,0,.31,0,0,0,0,-.03,0,0,0,0,1]);
+// Compare velocities either side of a sample, including the cyclic wrap.
+const frozen=engine.particles(forms[0]);
+const at=route=>Array.from(city.camera({overview,from:frozen,to:frozen,mix:0,poses:engine.motion(1),focus:1,route,aspect:1.6}));
+let worstVelocityJump=0;
+for(const route of [...Array.from({length:32},(_,i)=>1+i*7),180,404]){
+  const a=at(route-.01),b=at(route),c=at(route+.01);
+  const left=b.map((v,i)=>(v-a[i])/.01),right=c.map((v,i)=>(v-b[i])/.01);
+  const jump=Math.hypot(...left.map((v,i)=>v-right[i]))/(Math.hypot(...left)+Math.hypot(...right));
+  worstVelocityJump=Math.max(worstVelocityJump,jump);
+  assert(jump<.005,'Camera velocity must stay continuous through each dot and the ring seam');
+}
+for(const compact of [false,true])for(const route of [2,180,224,404,10000]){
+  const before=new Set(city.patch(route-.001,compact)),after=new Set(city.patch(route+.001,compact));
+  for(const i of new Set([...before,...after])){
+    const a=city.detailWeight(i,route-.001,compact),b=city.detailWeight(i,route+.001,compact);
+    assert(a>=0&&a<=1&&b>=0&&b<=1);
+    if(!before.has(i)||!after.has(i))assert.equal(a+b,0,'Replaced rows must be invisible before their buffers change');
+    else assert(Math.abs(a-b)<.002,'Shared buildings and anchors fade continuously');
+  }
+  assert.equal(city.detailWeight(city.index(44+route),route,compact),1,'Buildings near the camera remain fully visible');
+}
+console.log('OK: smooth cyclic camera path (max relative velocity jump '+worstVelocityJump.toFixed(4)+') and invisible patch-boundary swaps.');
 const types=new Set();
 for(const [f,form] of forms.entries()){
   const from=engine.particles(form),to=engine.particles(forms[(f+1)%forms.length]);
